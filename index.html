@@ -1,232 +1,25 @@
 
-<!DOCTYPE html>
-<html lang="am">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dila Bingo</title>
-    <style>
-        :root {
-            --bg-color: #d1c4e9;
-            --header-bg: #4a148c;
-            --b-color: #ffb300;
-            --i-color: #00e676;
-            --n-color: #29b6f6;
-            --g-color: #ef5350;
-            --o-color: #ab47bc;
+            <div id="timer-box" style="text-align: center; font-size: 20px; font-weight: bold; color: #e74c3c; margin: 10px 0;">
+    ጨዋታው በ <span id="countdown">40</span> ሰከንድ ይጀምራል...
+</div>
+       <script>
+    let timeLeft = 40;
+    const timerElement = document.getElementById('countdown');
+
+    const timerInterval = setInterval(() => {
+        timeLeft--;
+        if (timerElement) {
+            timerElement.innerText = timeLeft;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; user-select: none; }
-        body { background-color: var(--bg-color); padding: 10px; max-width: 500px; margin: 0 auto; }
-
-        /* SCREEN 1: 1-400 BOARD SELECTION */
-        #selection-screen { display: block; }
-        .top-info { display: flex; justify-content: space-between; background: #fff; padding: 12px; border-radius: 12px; margin-bottom: 10px; text-align: center; }
-        .info-card { flex: 1; }
-        .info-card h4 { font-size: 10px; color: #666; }
-        .info-card p { font-size: 16px; font-weight: bold; color: #4a148c; }
-        
-        .board-selector { background: #fff; border-radius: 12px; padding: 10px; max-height: 480px; overflow-y: auto; }
-        .boards-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; }
-        .b-btn { background: #e0e0e0; border: none; padding: 8px 2px; font-size: 10px; font-weight: bold; border-radius: 4px; cursor: pointer; text-align: center; }
-        .b-btn.selected { background: #00e676; color: #fff; }
-
-        /* SCREEN 2: LIVE GAMEPLAY */
-        #game-screen { display: none; }
-        .top-stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; background: #fff; padding: 8px; border-radius: 12px; text-align: center; margin-bottom: 8px; }
-        .stat-label { font-size: 9px; color: #666; }
-        .stat-val { font-size: 11px; font-weight: bold; }
-
-        .main-layout { display: grid; grid-template-columns: 110px 1fr; gap: 8px; }
-        .board-container { background: #fff; border-radius: 10px; padding: 4px; }
-        .board-header { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; text-align: center; font-size: 10px; font-weight: bold; color: #fff; margin-bottom: 4px; }
-        .b-head { background: var(--b-color); } .i-head { background: var(--i-color); } .n-head { background: var(--n-color); } .g-head { background: var(--g-color); } .o-head { background: var(--o-color); }
-        .board-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; }
-        .board-num { background: #f0f0f0; font-size: 9px; font-weight: bold; text-align: center; padding: 3px 0; border-radius: 2px; }
-        .board-num.active { background: #ff4081; color: #fff; }
-
-        .right-panel { display: flex; flex-direction: column; gap: 8px; }
-        .shuffling-card { background: var(--header-bg); color: #fff; border-radius: 15px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; }
-        .timer-badge { background: #ff6f00; color: #fff; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-        
-        .cartela-card { background: #fff; border-radius: 10px; padding: 8px; }
-        .cartela-title { color: #2e7d32; font-size: 12px; font-weight: bold; margin-bottom: 4px; }
-        .cartela-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; }
-        .c-cell { background: #f5f5f5; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; border-radius: 4px; }
-        .c-cell.marked { background: #00e676; color: #fff; }
-        .c-cell.free { background: #00e676; color: #fff; }
-
-        .action-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
-        .btn { padding: 10px; border: none; border-radius: 8px; font-weight: bold; color: #fff; cursor: pointer; }
-        .btn-play { background: #00e676; width: 100%; margin-top: 10px; font-size: 16px; }
-        .btn-refresh { background: #29b6f6; }
-        .btn-auto { background: #ab47bc; }
-    </style>
-</head>
-<body>
-
-    <!-- SCREEN 1: BOARD SELECTION -->
-    <div id="selection-screen">
-        <div class="top-info">
-            <div class="info-card"><h4>Selected</h4><p id="selected-id">None</p></div>
-            <div class="info-card"><h4>Wallet</h4><p>54</p></div>
-            <div class="info-card"><h4>Stake</h4><p>10</p></div>
-        </div>
-        <div class="board-selector">
-            <p style="font-size: 12px; font-weight: bold; margin-bottom: 8px; color: #333;">Boards: <span id="board-count">0</span>/2</p>
-            <div class="boards-grid" id="boards-400"></div>
-        </div>
-        <button class="btn btn-play" onclick="startGame()">ወደ ጨዋታው ግባ (Play)</button>
-    </div>
-
-    <!-- SCREEN 2: GAMEPLAY -->
-    <div id="game-screen">
-        <div class="top-stats">
-            <div><span class="stat-label">Game ID</span><div class="stat-val">MBGWQ4FF</div></div>
-            <div><span class="stat-label">Derash</span><div class="stat-val">10</div></div>
-            <div><span class="stat-label">Players</span><div class="stat-val">1</div></div>
-            <div><span class="stat-label">Bet</span><div class="stat-val">10</div></div>
-            <div><span class="stat-label">Call</span><div class="stat-val" id="call-cnt">0</div></div>
-        </div>
-
-        <div class="main-layout">
-            <div class="board-container">
-                <div class="board-header">
-                    <div class="b-head">B</div><div class="i-head">I</div><div class="n-head">N</div><div class="g-head">G</div><div class="o-head">O</div>
-                </div>
-                <div class="board-grid" id="full-board"></div>
-            </div>
-
-            <div class="right-panel">
-                <div class="shuffling-card">
-                    <span style="font-weight: bold;" id="game-status">Shuffling</span>
-                    <div class="timer-badge" id="timer">40</div>
-                </div>
-
-                <div class="cartela-card">
-                    <div class="cartela-title" id="active-cartela-title">Cartela #--</div>
-                    <div class="board-header">
-                        <div class="b-head">B</div><div class="i-head">I</div><div class="n-head">N</div><div class="g-head">G</div><div class="o-head">O</div>
-                    </div>
-                    <div class="cartela-grid" id="cartela-board"></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="action-btns">
-            <button class="btn btn-refresh" onclick="location.reload()">ተመለስ (Exit)</button>
-            <button class="btn btn-auto" onclick="startAutoCall()">Automatic</button>
-        </div>
-    </div>
-
-    <script>
-        let selectedBoard = null;
-        let calledNumbers = [];
-        let timer = 40;
-        let interval = null;
-
-        // Render 1 to 400 Selection Buttons
-        const grid400 = document.getElementById('boards-400');
-        for (let i = 1; i <= 400; i++) {
-            let btn = document.createElement('button');
-            btn.className = 'b-btn';
-            btn.innerText = i;
-            btn.onclick = () => selectBoard(i, btn);
-            grid400.appendChild(btn);
-        }
-
-        function selectBoard(num, el) {
-            document.querySelectorAll('.b-btn').forEach(b => b.classList.remove('selected'));
-            el.classList.add('selected');
-            selectedBoard = num;
-            document.getElementById('selected-id').innerText = "#" + num;
-            document.getElementById('board-count').innerText = "1";
-        }
-
-        function startGame() {
-            if (!selectedBoard) { alert("እባክዎን ከ 1-400 አንድ ካርቴላ ይምረጡ!"); return; }
-            document.getElementById('selection-screen').style.display = 'none';
-            document.getElementById('game-screen').style.display = 'block';
-            document.getElementById('active-cartela-title').innerText = "Cartela #" + selectedBoard;
-            
-            initFullBoard();
-            generateCartela();
-            startAutoCall();
-        }
-
-        function initFullBoard() {
-            const board = document.getElementById('full-board');
-            board.innerHTML = '';
-            for (let r = 0; r < 15; r++) {
-                for (let c = 0; c < 5; c++) {
-                    let num = (c * 15) + (r + 1);
-                    let div = document.createElement('div');
-                    div.className = 'board-num';
-                    div.id = `b-${num}`;
-                    div.innerText = num;
-                    board.appendChild(div);
-                }
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            // ሰዓቱ 0 ሲደርስ በራሱ የጨዋታውን ቁልፍ ይጫናል
+            const playBtn = document.querySelector('.play-btn') || document.querySelector('button'); 
+            if (playBtn) {
+                playBtn.click();
             }
         }
-
-        function generateCartela() {
-            const grid = document.getElementById('cartela-board');
-            grid.innerHTML = '';
-            let cols = [getRand(1,15), getRand(16,30), getRand(31,45), getRand(46,60), getRand(61,75)];
-            for (let r = 0; r < 5; r++) {
-                for (let c = 0; c < 5; c++) {
-                    let cell = document.createElement('div');
-                    cell.className = 'c-cell';
-                    if (r === 2 && c === 2) {
-                        cell.innerText = '★'; cell.classList.add('free');
-                    } else {
-                        let val = cols[c][r];
-                        cell.innerText = val; cell.dataset.val = val;
-                    }
-                    grid.appendChild(cell);
-                }
-            }
-        }
-
-        function getRand(min, max) {
-            let a = [];
-            while(a.length < 5) {
-                let r = Math.floor(Math.random() * (max - min + 1)) + min;
-                if(!a.includes(r)) a.push(r);
-            }
-            return a;
-        }
-
-        function startAutoCall() {
-            if (interval) return;
-            document.getElementById('game-status').innerText = "Playing...";
-            interval = setInterval(() => {
-                timer--;
-                document.getElementById('timer').innerText = timer;
-                if (timer <= 0) {
-                    callNextNumber();
-                    timer = 40;
-                }
-            }, 1000);
-        }
-
-        function callNextNumber() {
-            if (calledNumbers.length >= 75) { clearInterval(interval); return; }
-            let n;
-            do { n = Math.floor(Math.random() * 75) + 1; } while (calledNumbers.includes(n));
-            calledNumbers.push(n);
-            document.getElementById('call-cnt').innerText = calledNumbers.length;
-
-            let bEl = document.getElementById(`b-${n}`);
-            if (bEl) bEl.classList.add('active');
-
-            document.querySelectorAll('.c-cell').forEach(cell => {
-                if (cell.dataset.val == n) cell.classList.add('marked');
-            });
-
-            let speech = new SpeechSynthesisUtterance(n.toString());
-            window.speechSynthesis.speak(speech);
-        }
-    </script>
-</body>
-</html>
+    }, 1000);
+</script>
+ 
