@@ -59,20 +59,41 @@
         .sound-toggle.off {
             background: #e74c3c;
         }
+        .action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 6px 0;
+        }
         .timer-box {
-            font-size: 14px;
+            font-size: 13px;
             color: #ff4d4d;
             font-weight: bold;
-            margin: 6px 0;
             background: #4a1535;
             padding: 6px;
             border-radius: 6px;
             text-align: center;
+            flex: 1;
+            margin-right: 6px;
+        }
+        .play-btn {
+            background: #2ecc71;
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .play-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
         }
         .boards-info {
             color: #4cd137;
             font-size: 13px;
-            margin: 8px 0;
+            margin: 6px 0;
             font-weight: bold;
         }
         .grid-container {
@@ -124,7 +145,6 @@
             display: flex;
             gap: 6px;
         }
-        /* የ B I N G O 5 ዓምድ ሰንጠረዥ አቀማመጥ */
         .caller-table {
             flex: 1.2;
             background: #ffffff;
@@ -251,16 +271,19 @@
             <div class="title">Dila Bingo</div>
             <div class="stats-box">
                 <button class="sound-toggle" id="soundBtn" onclick="toggleSound()">🔊 Sound: ON</button>
-                <div class="stat-card"><span>Wallet</span>54</div>
+                <div class="stat-card"><span>Wallet</span><span id="walletDisp">54</span></div>
                 <div class="stat-card"><span>Stake</span>10</div>
             </div>
         </div>
 
-        <div class="timer-box" id="timer-display">
-            ጨዋታው በ <span id="countdown">15</span> ሰከንድ ውስጥ ይጀምራል...
+        <div class="action-bar">
+            <div class="timer-box" id="timer-display">
+                ጨዋታው በ <span id="countdown">15</span> ሰከንድ ውስጥ ይጀምራል...
+            </div>
+            <button class="play-btn" id="playNowBtn" onclick="confirmAndPlay()" disabled>ጀምር (Play)</button>
         </div>
 
-        <div class="boards-info" id="boardsCountText">Boards: 0/2</div>
+        <div class="boards-info" id="boardsCountText">Boards: 0/2 (እባክዎ ቢያንስ 1 ይምረጡ)</div>
 
         <div class="grid-container" id="boardsGrid"></div>
     </div>
@@ -276,7 +299,6 @@
         </div>
 
         <div class="game-layout">
-            <!-- 5 የ BINGO ዓምዶች ያሉት የቁጥሮች ሰሌዳ -->
             <table class="caller-table" id="callerTable">
                 <tr><th>B</th><th>I</th><th>N</th><th>G</th><th>O</th></tr>
             </table>
@@ -289,7 +311,7 @@
 
                 <div class="cartela-container">
                     <div style="font-size: 11px; font-weight: bold; margin-bottom: 2px;">የተመረጡ ካርዶች</div>
-                    <div id="selectedBoardsList" style="font-size: 12px; color: #2ecc71; font-weight: bold;">ካርቴላ #: 53</div>
+                    <div id="selectedBoardsList" style="font-size: 12px; color: #2ecc71; font-weight: bold;">--</div>
                 </div>
             </div>
         </div>
@@ -324,8 +346,9 @@
     <div id="walletModal" class="modal">
         <div class="modal-content">
             <h3>የእርስዎ ቦርሳ (Wallet)</h3>
-            <p style="font-size: 15px; color: #ffd700; font-weight: bold;">ቀሪ ሂሳብ: 54 ብር</p>
-            <button class="close-btn" onclick="closeModal('walletModal')" style="background:#ff4d4d;">ዝጋ</button>
+            <p style="font-size: 16px; color: #ffd700; font-weight: bold; margin: 10px 0;">ቀሪ ሂሳብ: <span id="modalWalletDisp">54</span> ብር</p>
+            <button class="close-btn" onclick="depositMoney()" style="background:#f39c12; margin-bottom: 6px; width: 100%;">ብር ጫን (Deposit +50 ብር)</button>
+            <button class="close-btn" onclick="closeModal('walletModal')" style="background:#ff4d4d; width: 100%;">ዝጋ</button>
         </div>
     </div>
 
@@ -338,7 +361,10 @@
     </div>
 
     <script>
+        let userWallet = 54; // የቦርሳ የመጀመሪያ ቀሪ ሂሳብ
+        let stakePerBoard = 10; // የአንድ ካርቴላ ዋጋ
         let soundEnabled = true;
+
         function toggleSound() {
             soundEnabled = !soundEnabled;
             const btn = document.getElementById('soundBtn');
@@ -351,7 +377,6 @@
             }
         }
 
-        // የድምጽ ጥሪ (Speech Synthesis) - ፊደሉን እና ቁጥሩን በድምጽ መጥራት (ለምሳሌ G 58)
         function speakNumber(letter, number) {
             if (!soundEnabled) return;
             if ('speechSynthesis' in window) {
@@ -365,6 +390,7 @@
         // ቦርዶቹን መፍጠር (1 እስከ 400)
         const grid = document.getElementById('boardsGrid');
         const countText = document.getElementById('boardsCountText');
+        const playBtn = document.getElementById('playNowBtn');
         let selectedCount = 0;
         let selectedBoards = [];
 
@@ -387,18 +413,73 @@
                     selectedCount++;
                     selectedBoards.push(i);
                 }
+                
                 countText.innerText = `Boards: ${selectedCount}/2`;
+                if (selectedCount > 0) {
+                    playBtn.removeAttribute('disabled');
+                } else {
+                    playBtn.setAttribute('disabled', 'true');
+                }
             };
             grid.appendChild(btn);
         }
 
-        // የ B I N G O 5 ዓምድ ሰንጠረዥን ማዘጋጀት
+        // ራስ-ሰር የሰአት ቆጣሪ (Timer)
+        let timeLeft = 15;
+        const countdownEl = document.getElementById("countdown");
+        const timerInterval = setInterval(() => {
+            timeLeft--;
+            if (countdownEl) countdownEl.innerText = timeLeft;
+            
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                if (selectedBoards.length > 0) {
+                    confirmAndPlay();
+                } else {
+                    // ነባሪ የዘፈቀደ ቦርድ መምረጥ ካልመረጠ
+                    selectedBoards = [53];
+                    confirmAndPlay();
+                }
+            }
+        }, 1000);
+
+        // ብር ቆርጦ ጨዋታውን ማስጀመር
+        function confirmAndPlay() {
+            let totalCost = selectedBoards.length * stakePerBoard;
+
+            if (userWallet < totalCost) {
+                alert("በቦርሳዎ ውስጥ በቂ ብር የለም! እባክዎ ብር ይጫኑ (Deposit)።");
+                openModal('walletModal');
+                return;
+            }
+
+            // ከቦርሳው ዋጋውን መቀነስ
+            userWallet -= totalCost;
+            updateWalletUI();
+
+            // የጨዋታ ስክሪን ማሳየት
+            startGamePlay();
+        }
+
+        function updateWalletUI() {
+            document.getElementById('walletDisp').innerText = userWallet;
+            document.getElementById('modalWalletDisp').innerText = userWallet;
+        }
+
+        // ለሙከራ ያህል ብር መሙላት (Deposit)
+        function depositMoney() {
+            userWallet += 50;
+            updateWalletUI();
+            alert("50 ብር በተሳካ ሁኔታ ተጭኗል!");
+            closeModal('walletModal');
+        }
+
+        // የ B I N G O 5 ዓምድ ሰንጠረዥ ማዘጋጀት
         const callerTable = document.getElementById('callerTable');
         const cells = {};
 
         for (let row = 1; row <= 15; row++) {
             const tr = document.createElement('tr');
-            
             let bVal = row;
             let iVal = row + 15;
             let nVal = row + 30;
@@ -411,33 +492,15 @@
                 tr.appendChild(td);
                 cells[item.v] = { element: td, letter: item.l };
             });
-
             callerTable.appendChild(tr);
         }
 
-        let timeLeft = 15;
-        const countdownEl = document.getElementById("countdown");
-
-        const timerInterval = setInterval(() => {
-            timeLeft--;
-            if (countdownEl) countdownEl.innerText = timeLeft;
-            
-            if (timeLeft <= 0) {
-                clearInterval(timerInterval);
-                startGamePlay();
-            }
-        }, 1000);
-
         function startGamePlay() {
+            clearInterval(timerInterval);
             document.getElementById('selection-screen').style.display = 'none';
             document.getElementById('game-screen').style.display = 'block';
 
-            const listDisp = document.getElementById('selectedBoardsList');
-            if (selectedBoards.length > 0) {
-                listDisp.innerText = `ካርቴላ #: ${selectedBoards.join(', ')}`;
-            } else {
-                listDisp.innerText = "ካርቴላ #: 53 (Autoplay)";
-            }
+            document.getElementById('selectedBoardsList').innerText = `ካርቴላ #: ${selectedBoards.join(', ')}`;
 
             let totalPlayers = 100;
             let totalPool = totalPlayers * 10;
@@ -478,7 +541,14 @@
                         let winUtter = new SpeechSynthesisUtterance("Bingo! Winner found!");
                         window.speechSynthesis.speak(winUtter);
                     }
-                    document.getElementById('bingoMessage').innerText = `ካርቴላ #${selectedBoards[0] || 53} አሸንፏል! ደራሹን ወስደዋል!`;
+                    
+                    // ተጫዋቹ ቢያሸንፍ ደራሹን ወደ ቦርሳው መመለስ ይቻላል
+                    let totalPool = 100 * 10;
+                    let derashAmount = totalPool - (totalPool * 0.25);
+                    userWallet += derashAmount;
+                    updateWalletUI();
+
+                    document.getElementById('bingoMessage').innerText = `ካርቴላ #${selectedBoards[0] || 53} አሸንፏል! ${derashAmount} ብር ወደ ቦርሳዎ ገብቷል!`;
                     document.getElementById('bingoModal').style.display = 'flex';
                 }
             }, 2500);
@@ -491,6 +561,5 @@
             document.getElementById(modalId).style.display = 'none';
         }
     </script>
-
 </body>
 </html>
