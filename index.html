@@ -442,17 +442,33 @@
             soundEnabled = document.getElementById('soundToggle').checked;
         }
 
-        // የተስተካከለው የድምፅ አጠራር ተግባር
+        // ፊደላቱን በአማረኛ ድምፅ እንዲጠራ ማስተካከያ (Amharic mapping)
+        function getAmharicLetterName(letter) {
+            switch(letter) {
+                case 'B': return 'ቢ';
+                case 'I': return 'አይ';
+                case 'N': return 'ኤን';
+                case 'G': return 'ጂ';
+                case 'O': return 'ኦ';
+                default: return letter;
+            }
+        }
+
+        // የአማረኛ ድምፅ ጥሪ ተግባር
         function speakNumber(letter, number) {
             if (!soundEnabled) return;
 
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
 
-                const text = `${letter} ${number}`;
+                // የፊደሉን ስም ወደ አማረኛ በመቀየር (ለምሳሌ "ጂ 50")
+                let amharicLetter = getAmharicLetterName(letter);
+                const text = `${amharicLetter} ${number}`;
+
                 const utterance = new SpeechSynthesisUtterance(text);
 
-                utterance.lang = 'en-US';
+                // ቋንቋውን ወደ አማረኛ (am-ET) ማስተካከል
+                utterance.lang = 'am-ET';
                 utterance.rate = 0.75;
                 utterance.pitch = 1;
                 utterance.volume = 1;
@@ -677,7 +693,7 @@
             }
 
             if(isMarked(matrix[0][0]) && isMarked(matrix[1][1]) && isMarked(matrix[2][2]) && isMarked(matrix[3][3]) && isMarked(matrix[4][4])) {
-                return true;
+                return true
             }
 
             if(isMarked(matrix[0][4]) && isMarked(matrix[1][3]) && isMarked(matrix[2][2]) && isMarked(matrix[3][1]) && isMarked(matrix[4][0])) {
@@ -718,6 +734,7 @@
                     cells[randomNum].element.classList.add('active');
                     let letter = cells[randomNum].letter;
                     
+                    // ቁጥሩን እና ፊደሉን በአማረኛ ድምፅ ይጠራል
                     speakNumber(letter, randomNum);
 
                     selectedBoards.forEach(bId => {
@@ -736,7 +753,8 @@
 
                         if ('speechSynthesis' in window && soundEnabled) {
                             window.speechSynthesis.cancel();
-                            let winUtter = new SpeechSynthesisUtterance("Bingo! Winner found!");
+                            let winUtter = new SpeechSynthesisUtterance("ቢንጎ! አሸናፊ ተገኝቷል!");
+                            winUtter.lang = 'am-ET';
                             window.speechSynthesis.speak(winUtter);
                         }
                         
