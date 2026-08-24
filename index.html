@@ -40,6 +40,7 @@
             text-align: center;
             font-weight: bold;
             font-size: 12px;
+            cursor: pointer;
         }
         .stat-card span {
             display: block;
@@ -271,7 +272,7 @@
             <div class="title">Dila Bingo</div>
             <div class="stats-box">
                 <button class="sound-toggle" id="soundBtn" onclick="toggleSound()">🔊 Sound: ON</button>
-                <div class="stat-card"><span>Wallet</span><span id="walletDisp">54</span></div>
+                <div class="stat-card" onclick="openModal('walletModal')"><span>Wallet</span><span id="walletDisp">54</span></div>
                 <div class="stat-card"><span>Stake</span>10</div>
             </div>
         </div>
@@ -338,7 +339,9 @@
     <div id="historyModal" class="modal">
         <div class="modal-content">
             <h3>የጨዋታ ታሪክ</h3>
-            <p style="font-size: 12px; color: #ddd;">ያለፉት ጨዋታዎች ውጤቶች እዚህ ይታያሉ።</p>
+            <div id="historyList" style="font-size: 12px; color: #ddd; max-height: 150px; overflow-y: auto; text-align: left; margin: 10px 0;">
+                ምንም ታሪክ የለም።
+            </div>
             <button class="close-btn" onclick="closeModal('historyModal')" style="background:#ff4d4d;">ዝጋ</button>
         </div>
     </div>
@@ -361,9 +364,14 @@
     </div>
 
     <script>
-        let userWallet = 54; // የቦርሳ የመጀመሪያ ቀሪ ሂሳብ
-        let stakePerBoard = 10; // የአንድ ካርቴላ ዋጋ
+        // localStorage በመጠቀም ከሬፍሬሽ በኋላም ሂሳብ እና ታሪክ እንዳይጠፋ ማድረግ
+        let userWallet = localStorage.getItem('dila_wallet') !== null ? parseInt(localStorage.getItem('dila_wallet')) : 54;
+        let gameHistory = JSON.parse(localStorage.getItem('dila_history')) || [];
+        let stakePerBoard = 10;
         let soundEnabled = true;
+
+        updateWalletUI();
+        renderHistory();
 
         function toggleSound() {
             soundEnabled = !soundEnabled;
@@ -436,8 +444,7 @@
                 if (selectedBoards.length > 0) {
                     confirmAndPlay();
                 } else {
-                    // ነባሪ የዘፈቀደ ቦርድ መምረጥ ካልመረጠ
-                    selectedBoards = [53];
+                    selectedBoards = [53]; // ነባሪ ቦርድ ካልመረጠ
                     confirmAndPlay();
                 }
             }
@@ -453,11 +460,11 @@
                 return;
             }
 
-            // ከቦርሳው ዋጋውን መቀነስ
+            // ከቦርሳው ዋጋውን መቀነስ እና በ localStorage ማስቀመጥ
             userWallet -= totalCost;
+            localStorage.setItem('dila_wallet', userWallet);
             updateWalletUI();
 
-            // የጨዋታ ስክሪን ማሳየት
             startGamePlay();
         }
 
@@ -466,9 +473,10 @@
             document.getElementById('modalWalletDisp').innerText = userWallet;
         }
 
-        // ለሙከራ ያህል ብር መሙላት (Deposit)
+        // Simulated Deposit (+50 ብር)
         function depositMoney() {
             userWallet += 50;
+            localStorage.setItem('dila_wallet', userWallet);
             updateWalletUI();
             alert("50 ብር በተሳካ ሁኔታ ተጭኗል!");
             closeModal('walletModal');
@@ -508,10 +516,10 @@
             document.getElementById('derash-box').innerHTML = `<span>Derash</span>${derashAmount}`;
             document.getElementById('players-box').innerHTML = `<span>Players</span>${totalPlayers}`;
 
-            startCallingNumbers();
+            startCallingNumbers(derashAmount);
         }
 
-        function startCallingNumbers() {
+        function startCallingNumbers(derashAmount) {
             let calledNumbers = [];
             let callBox = document.getElementById('call-box');
             let currentNumDisp = document.getElementById('currentNumDisp');
@@ -542,16 +550,29 @@
                         window.speechSynthesis.speak(winUtter);
                     }
                     
-                    // ተጫዋቹ ቢያሸንፍ ደራሹን ወደ ቦርሳው መመለስ ይቻላል
-                    let totalPool = 100 * 10;
-                    let derashAmount = totalPool - (totalPool * 0.25);
+                    // አሸናፊ ሲሆን ደራሹን ወደ ቦርሳው መጨመር
                     userWallet += derashAmount;
+                    localStorage.setItem('dila_wallet', userWallet);
                     updateWalletUI();
 
-                    document.getElementById('bingoMessage').innerText = `ካርቴላ #${selectedBoards[0] || 53} አሸንፏል! ${derashAmount} ብር ወደ ቦርሳዎ ገብቷል!`;
+                    // ታሪክ ላይ ማስቀመጥ
+                    gameHistory.unshift(`አሸንፈዋል! ካርቴላ #${selectedBoards.join(', ')} - ሽልማት: ${derashAmount} ብር`);
+                    localStorage.setItem('dila_history', JSON.stringify(gameHistory));
+                    renderHistory();
+
+                    document.getElementById('bingoMessage').innerText = `ካርቴላ #${selectedBoards.join(', ')} አሸንፏል! ${derashAmount} ብር ወደ ቦርሳዎ ገብቷል!`;
                     document.getElementById('bingoModal').style.display = 'flex';
                 }
             }, 2500);
+        }
+
+        function renderHistory() {
+            const listEl = document.getElementById('historyList');
+            if (gameHistory.length > 0) {
+                listEl.innerHTML = gameHistory.map(item => `• ${item}<br>`).join('');
+            } else {
+                listEl.innerHTML = "ምንም የጨዋታ ታሪክ የለም።";
+            }
         }
 
         function openModal(modalId) {
