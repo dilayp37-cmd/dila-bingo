@@ -351,7 +351,7 @@
 
         <div class="game-layout">
             <table class="caller-table" id="callerTable">
-                <tr><th>B</th><th>I</th><th>N</th><th>G</th><th>O</th></tr>
+                <tr><th>ቢ</th><th>አይ</th><th>ኤን</th><th>ጂ</th><th>ኦ</th></tr>
             </table>
 
             <div class="right-section">
@@ -443,14 +443,29 @@
             soundEnabled = document.getElementById('soundToggle').checked;
         }
 
-        // ድምጹን ለመፈተሽ የሚረዳ ቁልፍ (በስልክ ብሮውዘር እንዳይታፈን ይረዳል)
+        // የድምጽ ምርመራ በአማርኛ ቃላት ተዘጋጅቷል
         function testVoice() {
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
-                let utterance = new SpeechSynthesisUtterance("ቢ 1");
-                utterance.lang = 'am-ET';
+                let utterance = new SpeechSynthesisUtterance("ጂ ኃምሳ");
+                utterance.lang = 'am';
                 window.speechSynthesis.speak(utterance);
             }
+        }
+
+        // ቁጥሮችን እና ፊደላትን በአማርኛ ሙሉ ቃላት እንዲነበብ የሚቀይር ፋንክሽን
+        function getAmharicWordNumber(num) {
+            const amharicNumbers = {
+                1: "አንድ", 2: "ሁለት", 3: "ሶስት", 4: "አራት", 5: "አንስት", 6: "ስድስት", 7: "ሰባት", 8: "ስምንት", 9: "ዘጠኝ", 10: "አስር",
+                11: "አስራ አንድ", 12: "አስራ ሁለት", 13: "አስራ ሶስት", 14: "አስራ አራት", 15: "አስራ አምስት", 16: "አስራ ስድስት", 17: "አስራ ሰባት", 18: "አስራ ስምንት", 19: "አስራ ዘጠኝ", 20: "ሃያ",
+                21: "ሃያ አንድ", 22: "ሃያ ሁለት", 23: "ሃያ ሶስት", 24: "ሃያ አራት", 25: "ሃያ አምስት", 26: "ሃያ ስድስት", 27: "ሃያ ሰባት", 28: "ሃያ ስምንት", 29: "ሃያ ዘጠኝ", 30: "ሰላሳ",
+                31: "ሰላሳ አንድ", 32: "ሰላሳ ሁለት", 33: "ሰላሳ ሶስት", 34: "ሰላሳ አራት", 35: "ሰላሳ አምስት", 36: "ሰላሳ ስድስት", 37: "ሰላሳ ሰባት", 38: "ሰላሳ ስምንት", 39: "ሰላሳ ዘጠኝ", 40: "አርባ",
+                41: "አርባ አንድ", 42: "አርባ ሁለት", 43: "አርባ ሶስት", 44: "አርባ አራት", 45: "አርባ አምስት", 46: "አርባ ስድስት", 47: "አርባ ሰባት", 48: "አርባ ስምንት", 49: "አርባ ዘጠኝ", 50: "ኃምሳ",
+                51: "ኃምሳ አንድ", 52: "ኃምሳ ሁለት", 53: "ኃምሳ ሶስት", 54: "ኃምሳ አራት", 55: "ኃምሳ አምስት", 56: "ኃምሳ ስድስት", 57: "ኃምሳ ሰባት", 58: "ኃምሳ ስምንት", 59: "ኃምሳ ዘጠኝ", 60: "ስድሳ",
+                61: "ስድሳ አንድ", 62: "ስድሳ ሁለት", 63: "ስድሳ ሶስት", 64: "ስድሳ አራት", 65: "ስድሳ አምስት", 66: "ስድሳ ስድስት", 67: "ስድሳ ሰባት", 68: "ስድሳ ስምንት", 69: "ስድሳ ዘጠኝ", 70: "ሰባ",
+                71: "ሰባ አንድ", 72: "ሰባ ሁለት", 73: "ሰባ ሶስት", 74: "ሰባ አራት", 75: "ሰባ አምስት"
+            };
+            return amharicNumbers[num] || num;
         }
 
         function getAmharicLetterName(letter) {
@@ -470,12 +485,17 @@
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
                 let amharicLetter = getAmharicLetterName(letter);
-                const text = `${amharicLetter} ${number}`;
+                let amharicNumberWord = getAmharicWordNumber(number);
+                
+                // ስልኩ ቁጥሩን በእንግሊዝኛ እንዳያነበው በአማርኛ ቃላት ተሰርቷል (ለምሳሌ: "ቢ ሃያ አራት")
+                const text = `${amharicLetter} ${amharicNumberWord}`;
                 const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'am-ET';
-                utterance.rate = 0.8;
+                
+                utterance.lang = 'am';
+                utterance.rate = 0.75;
                 utterance.pitch = 1;
                 utterance.volume = 1;
+                
                 window.speechSynthesis.speak(utterance);
             }
         }
@@ -664,13 +684,12 @@
                 }
             });
 
-            // የደርሽ ሂሳብ ከተጫዋቾች ብዛት እና ከተመረጡት ቦርዶች ጋር እንዲለዋወጥ ተደርጓል
-            let totalPlayers = Math.floor(Math.random() * 40) + 70; // ከ 70 እስከ 110 ተጫዋቾች በዘፈቀደ
-            let botBoardsCount = totalPlayers * 2; // አርቴፊሻል ተጫዋቾች የያዟቸው ቦርዶች
+            let totalPlayers = Math.floor(Math.random() * 40) + 70;
+            let botBoardsCount = totalPlayers * 2;
             let allActiveBoardsCount = botBoardsCount + selectedBoards.length;
             
             let totalPool = allActiveBoardsCount * stakePerBoard;
-            let derashAmount = totalPool - (totalPool * 0.25); // 25% ቤት ሲቀነስ
+            let derashAmount = totalPool - (totalPool * 0.25);
             
             document.getElementById('derash-box').innerHTML = `<span>Derash</span>${derashAmount}`;
             document.getElementById('players-box').innerHTML = `<span>Players</span>${totalPlayers}`;
@@ -758,7 +777,7 @@
                         if ('speechSynthesis' in window && soundEnabled) {
                             window.speechSynthesis.cancel();
                             let winUtter = new SpeechSynthesisUtterance("ቢንጎ! አሸናፊ ተገኝቷል!");
-                            winUtter.lang = 'am-ET';
+                            winUtter.lang = 'am';
                             window.speechSynthesis.speak(winUtter);
                         }
                         
