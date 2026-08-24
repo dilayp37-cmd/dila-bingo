@@ -1,33 +1,138 @@
-                document.write(`
-                    <div class="board">
-                        <h3>ቦርድ #${i}</h3>
-                        <table>
-                            <tr><th>B</th><th>I</th><th>N</th><th>G</th><th>O</th></tr>
-                            <tr><td>${i}</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-                            <tr><td>-</td><td>${i+1}</td><td>-</td><td>-</td><td>-</td></tr>
-                            <tr><td>-</td><td>-</td><td>${i+2}</td><td>-</td><td>-</td></tr>
-                            <tr><td>-</td><td>-</td><td>-</td><td>${i+3}</td><td>-</td></tr>
-                            <tr><td>-</td><td>-</td><td>-</td><td>-</td><td>${i+4}</td></tr>
-                        </table>
-                    </div>
-                `);
-            }
-        </script>
+<!DOCTYPE html>
+<html lang="am">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BankeruBingo</title>
+    <style>
+        body {
+            background-color: #2b0c1e;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 10px;
+            padding-bottom: 70px;
+        }
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #4a1535;
+            padding: 10px 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        .title {
+            color: #ffd700;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .stats-box {
+            display: flex;
+            gap: 10px;
+        }
+        .stat-card {
+            background: #ffffff;
+            color: #2b0c1e;
+            padding: 5px 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .stat-card span {
+            display: block;
+            font-size: 10px;
+            color: #666;
+        }
+        .boards-info {
+            color: #4cd137;
+            font-size: 14px;
+            margin: 10px 0;
+            font-weight: bold;
+            text-align: left;
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
+            gap: 8px;
+        }
+        .board-btn {
+            background: #dcdde1;
+            color: #2f3640;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 0;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .board-btn.selected {
+            background: #4cd137;
+            color: #fff;
+        }
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #350924;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            border-top: 2px solid #57133a;
+        }
+        .nav-item {
+            color: #b2bec3;
+            text-align: center;
+            font-size: 11px;
+            cursor: pointer;
+        }
+        .nav-item.active {
+            color: #ffd700;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-top">
+        <div class="title">BankeruBingo</div>
+        <div class="stats-box">
+            <div class="stat-card">
+                <span>Wallet</span>
+                54
+            </div>
+            <div class="stat-card">
+                <span>Stake</span>
+                10
+            </div>
+        </div>
+    </div>
+
+    <div class="boards-info">Boards: 0/2</div>
+
+    <div class="grid-container" id="boardsGrid"></div>
+
+    <div class="bottom-nav">
+        <div class="nav-item active">🏠<br>BINGO</div>
+        <div class="nav-item">🕒<br>HISTORY</div>
+        <div class="nav-item">💰<br>WALLET</div>
+        <div class="nav-item">👤<br>PROFILE</div>
     </div>
 
     <script>
-        let timeLeft = 40;
-        const timerInterval = setInterval(() => {
-            timeLeft--;
-            const el = document.getElementById("countdown");
-            if (el) {
-                el.innerText = timeLeft;
-            }
-            if (timeLeft <= 0) {
-                clearInterval(timerInterval);
-                timeLeft = 40;
-            }
-        }, 1000);
+        const grid = document.getElementById('boardsGrid');
+        for (let i = 1; i <= 400; i++) {
+            const btn = document.createElement('button');
+            btn.className = 'board-btn';
+            btn.innerText = i;
+            btn.onclick = () => {
+                btn.classList.toggle('selected');
+            };
+            grid.appendChild(btn);
+        }
     </script>
 
 </body>
