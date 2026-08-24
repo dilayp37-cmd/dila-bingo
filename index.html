@@ -1,24 +1,106 @@
-<div id="timer-box" style="text-align: center; font-size: 20px; font-weight: bold; color: #e74c3c; margin: 10px 0;">
-    ጨዋታው በ <span id="countdown">40</span> ሰከንድ ይጀምራል...
-</div>
-       <script>
-    let timeLeft = 40;
-    const timerElement = document.getElementById('countdown');
-
-    const timerInterval = setInterval(() => {
-        timeLeft--;
-        if (timerElement) {
-            timerElement.innerText = timeLeft;
+<!DOCTYPE html>
+<html lang="am">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dila Bingo</title>
+    <style>
+        body {
+            background-color: #2b0c1e;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 10px;
         }
+        h1 {
+            color: #ffd700;
+            font-size: 24px;
+            margin: 10px 0;
+        }
+        #timer-box {
+            font-size: 20px;
+            color: #ff4d4d;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        .boards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 10px;
+            padding: 5px;
+        }
+        .board {
+            background: #4a1535;
+            border: 2px solid #802050;
+            border-radius: 8px;
+            padding: 8px;
+        }
+        .board h3 {
+            font-size: 14px;
+            margin: 5px 0;
+            color: #ffd700;
+        }
+        .board table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            color: #000;
+            font-size: 11px;
+        }
+        .board th, .board td {
+            border: 1px solid #4a1535;
+            text-align: center;
+            padding: 3px;
+        }
+        .board th {
+            background: #802050;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
 
-        if (timeLeft <= 0) {
-            clearInterval(timerInterval);
-            // ሰዓቱ 0 ሲደርስ በራሱ የጨዋታውን ቁልፍ ይጫናል
-            const playBtn = document.querySelector('.play-btn') || document.querySelector('button'); 
-            if (playBtn) {
-                playBtn.click();
+    <h1>Dila Bingo</h1>
+    
+    <div id="timer-box">
+        ጨዋታው በ <span id="countdown">40</span> ሰከንድ ውስጥ ይጀምራል...
+    </div>
+
+    <div class="boards-container">
+        <script>
+            for(let i=1; i<=400; i++) {
+                document.write(`
+                    <div class="board">
+                        <h3>ቦርድ #${i}</h3>
+                        <table>
+                            <tr><th>B</th><th>I</th><th>N</th><th>G</th><th>O</th></tr>
+                            <tr><td>${i}</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+                            <tr><td>-</td><td>${i+1}</td><td>-</td><td>-</td><td>-</td></tr>
+                            <tr><td>-</td><td>-</td><td>${i+2}</td><td>-</td><td>-</td></tr>
+                            <tr><td>-</td><td>-</td><td>-</td><td>${i+3}</td><td>-</td></tr>
+                            <tr><td>-</td><td>-</td><td>-</td><td>-</td><td>${i+4}</td></tr>
+                        </table>
+                    </div>
+                `);
             }
-        }
-    }, 1000);
-</script>
- 
+        </script>
+    </div>
+
+    <script>
+        let timeLeft = 40;
+        const timerInterval = setInterval(() => {
+            timeLeft--;
+            const el = document.getElementById("countdown");
+            if (el) {
+                el.innerText = timeLeft;
+            }
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                timeLeft = 40;
+            }
+        }, 1000);
+    </script>
+
+</body>
+</html>
