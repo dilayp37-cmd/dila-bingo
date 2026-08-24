@@ -10,77 +10,120 @@
             color: #ffffff;
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 10px;
-            padding-bottom: 70px;
+            padding: 8px;
+            padding-bottom: 60px;
         }
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .top-stats {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 4px;
             background: #4a1535;
-            padding: 10px 15px;
-            border-radius: 10px;
-            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            text-align: center;
         }
-        .title {
-            color: #ffd700;
-            font-size: 20px;
-            font-weight: bold;
-        }
-        .stats-box {
-            display: flex;
-            gap: 10px;
-        }
-        .stat-card {
+        .stat-box {
             background: #ffffff;
             color: #2b0c1e;
-            padding: 5px 12px;
-            border-radius: 8px;
-            text-align: center;
+            padding: 4px 2px;
+            border-radius: 6px;
+            font-size: 11px;
             font-weight: bold;
-            font-size: 14px;
         }
-        .stat-card span {
+        .stat-box span {
             display: block;
-            font-size: 10px;
-            color: #666;
+            font-size: 9px;
+            color: #555;
         }
-        .timer-box {
-            font-size: 16px;
-            color: #ff4d4d;
+        .game-layout {
+            display: flex;
+            gap: 8px;
+        }
+        /* የግራ በኩል የቁጥሮች ሰንጠረዥ (1-75) */
+        .caller-grid {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 3px;
+            background: #ffffff;
+            padding: 6px;
+            border-radius: 8px;
+        }
+        .call-cell {
+            background: #f1f2f6;
+            color: #2f3640;
+            text-align: center;
+            padding: 6px 0;
+            font-size: 11px;
             font-weight: bold;
-            margin: 8px 0;
+            border-radius: 4px;
+        }
+        .call-cell.active {
+            background: #ff9f43;
+            color: #fff;
+        }
+        /* የቀኝ በኩል የካርቴላ እና የጥሪ ማሳያ */
+        .right-section {
+            flex: 1.2;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .current-call-card {
             background: #4a1535;
             padding: 8px;
             border-radius: 8px;
             text-align: center;
         }
-        .boards-info {
-            color: #4cd137;
-            font-size: 14px;
-            margin: 10px 0;
+        .current-number {
+            font-size: 22px;
+            color: #ffd700;
             font-weight: bold;
-            text-align: left;
+            background: #2b0c1e;
+            display: inline-block;
+            padding: 4px 15px;
+            border-radius: 20px;
+            margin-top: 4px;
         }
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
-            gap: 8px;
-        }
-        .board-btn {
-            background: #dcdde1;
-            color: #2f3640;
-            border: none;
+        .cartela-container {
+            background: #ffffff;
+            color: #2b0c1e;
+            padding: 8px;
             border-radius: 8px;
-            padding: 12px 0;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
         }
-        .board-btn.selected {
-            background: #4cd137;
-            color: #fff;
+        .cartela-title {
+            font-size: 13px;
+            font-weight: bold;
+            color: #2b0c1e;
+            margin-bottom: 6px;
+        }
+        .bingo-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .bingo-table th {
+            background: #3498db;
+            color: white;
+            font-size: 11px;
+            padding: 3px;
+        }
+        .bingo-table td {
+            border: 1px solid #ddd;
+            text-align: center;
+            padding: 6px 0;
+            font-size: 12px;
+            font-weight: bold;
+            background: #f8f9fa;
+        }
+        .bingo-table td.marked {
+            background: #2ecc71;
+            color: white;
+        }
+        .bingo-table td.star {
+            background: #2ecc71;
+            color: white;
+            font-size: 14px;
         }
         .bottom-nav {
             position: fixed;
@@ -90,97 +133,104 @@
             background: #350924;
             display: flex;
             justify-content: space-around;
-            padding: 10px 0;
+            padding: 8px 0;
             border-top: 2px solid #57133a;
         }
-        .nav-item {
-            color: #b2bec3;
-            text-align: center;
-            font-size: 11px;
-            cursor: pointer;
-        }
-        .nav-item.active {
-            color: #ffd700;
+        .nav-btn {
+            background: #2ecc71;
+            color: white;
+            border: none;
+            padding: 6px 15px;
+            border-radius: 6px;
             font-weight: bold;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
 
-    <div class="header-top">
-        <div class="title">Dila Bingo</div>
-        <div class="stats-box">
-            <div class="stat-card">
-                <span>Wallet</span>
-                54
+    <!-- የላይኛውን መረጃዎች ሰንጠረዥ -->
+    <div class="top-stats">
+        <div class="stat-box"><span>Game ID</span>MB9G</div>
+        <div class="stat-box"><span>Derash</span>20</div>
+        <div class="stat-box"><span>Players</span>2</div>
+        <div class="stat-box"><span>Bet</span>10</div>
+        <div class="stat-box" id="call-count"><span>Call</span>0</div>
+    </div>
+
+    <div class="game-layout">
+        <!-- የግራ በኩል የቁጥሮች ሰሌዳ (1 እስከ 75) -->
+        <div class="caller-grid" id="callerGrid"></div>
+
+        <!-- የቀኝ በኩል ማሳያ -->
+        <div class="right-section">
+            <div class="current-call-card">
+                <div style="font-size: 12px; color: #ddd;">Current Call</div>
+                <div class="current-number" id="currentNumDisp">--</div>
             </div>
-            <div class="stat-card">
-                <span>Stake</span>
-                10
+
+            <!-- የካርቴላ ማሳያ -->
+            <div class="cartela-container">
+                <div class="cartela-title">Cartela #62</div>
+                <table class="bingo-table">
+                    <tr><th>B</th><th>I</th><th>N</th><th>G</th><th>O</th></tr>
+                    <tr><td>6</td><td>16</td><td>38</td><td>51</td><td>69</td></tr>
+                    <tr><td>4</td><td>30</td><td>43</td><td class="marked">52</td><td>68</td></tr>
+                    <tr><td>3</td><td>29</td><td class="star">★</td><td>56</td><td>75</td></tr>
+                    <tr><td>11</td><td>20</td><td>42</td><td>47</td><td>72</td></tr>
+                    <tr><td>7</td><td>18</td><td>37</td><td>46</td><td>64</td></tr>
+                </table>
             </div>
         </div>
     </div>
 
-    <div class="timer-box" id="timer-display">
-        ጨዋታው በ <span id="countdown">40</span> ሰከንድ ውስጥ ይጀምራል...
-    </div>
-
-    <div class="boards-info" id="boardsCountText">Boards: 0/2</div>
-
-    <div class="grid-container" id="boardsGrid"></div>
-
     <div class="bottom-nav">
-        <div class="nav-item active">🏠<br>BINGO</div>
-        <div class="nav-item">🕒<br>HISTORY</div>
-        <div class="nav-item">💰<br>WALLET</div>
-        <div class="nav-item">👤<br>PROFILE</div>
+        <button class="nav-btn" onclick="location.reload()">Refresh</button>
+        <button class="nav-btn" style="background: #27ae60;" id="autoBtn">Automatic</button>
     </div>
 
     <script>
-        const grid = document.getElementById('boardsGrid');
-        const countText = document.getElementById('boardsCountText');
-        let selectedCount = 0;
-        let selectedBoards = [];
-
-        for (let i = 1; i <= 400; i++) {
-            const btn = document.createElement('button');
-            btn.className = 'board-btn';
-            btn.innerText = i;
-            
-            btn.onclick = () => {
-                if (btn.classList.contains('selected')) {
-                    btn.classList.remove('selected');
-                    selectedCount--;
-                    selectedBoards = selectedBoards.filter(item => item !== i);
-                } else {
-                    if (selectedCount >= 2) {
-                        alert("ከ 2 ቦርድ በላይ መምረጥ አይችሉም!");
-                        return;
-                    }
-                    btn.classList.add('selected');
-                    selectedCount++;
-                    selectedBoards.push(i);
-                }
-                countText.innerText = `Boards: ${selectedCount}/2`;
-            };
-            
-            grid.appendChild(btn);
+        // የግራውን ሰሌዳ ከ 1 እስከ 75 መሙላት
+        const callerGrid = document.getElementById('callerGrid');
+        const cells = {};
+        for (let i = 1; i <= 75; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'call-cell';
+            cell.innerText = i;
+            callerGrid.appendChild(cell);
+            cells[i] = cell;
         }
 
-        let timeLeft = 40;
-        const countdownEl = document.getElementById("countdown");
-        const timerBox = document.getElementById("timer-display");
+        // አውቶማቲክ ቁጥሮችን እየጠራ ማሳየት
+        let calledNumbers = [];
+        let callCountEl = document.getElementById('call-count');
+        let currentNumDisp = document.getElementById('currentNumDisp');
 
-        const timerInterval = setInterval(() => {
-            timeLeft--;
-            if (countdownEl) {
-                countdownEl.innerText = timeLeft;
-            }
-            if (timeLeft <= 0) {
-                clearInterval(timerInterval);
-                timerBox.innerHTML = "<span style='color: #4cd137;'>ጨዋታው ጀምሯል!</span>";
-            }
-        }, 1000);
+        function startCalling() {
+            let interval = setInterval(() => {
+                if (calledNumbers.length >= 75) {
+                    clearInterval(interval);
+                    return;
+                }
+                let randomNum;
+                do {
+                    randomNum = Math.floor(Math.random() * 75) + 1;
+                } while (calledNumbers.includes(randomNum));
+
+                calledNumbers.push(randomNum);
+                currentNumDisp.innerText = randomNum;
+                callCountEl.innerHTML = `<span>Call</span>${calledNumbers.length}`;
+
+                if (cells[randomNum]) {
+                    cells[randomNum].classList.add('active');
+                }
+            }, 2000); // በየ 2 ሰከንዱ ቁጥር ይጠራል
+        }
+
+        // ጨዋታው እንደገባ በራሱ እንዲጀምር ማድረግ
+        window.onload = () => {
+            startCalling();
+        };
     </script>
 
 </body>
