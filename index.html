@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BankeruBingo</title>
+    <title>Dila Bingo</title>
     <style>
         body {
             background-color: #2b0c1e;
@@ -44,6 +44,16 @@
             display: block;
             font-size: 10px;
             color: #666;
+        }
+        .timer-box {
+            font-size: 16px;
+            color: #ff4d4d;
+            font-weight: bold;
+            margin: 8px 0;
+            background: #4a1535;
+            padding: 8px;
+            border-radius: 8px;
+            text-align: center;
         }
         .boards-info {
             color: #4cd137;
@@ -98,7 +108,7 @@
 <body>
 
     <div class="header-top">
-        <div class="title">BankeruBingo</div>
+        <div class="title">Dila Bingo</div>
         <div class="stats-box">
             <div class="stat-card">
                 <span>Wallet</span>
@@ -111,7 +121,11 @@
         </div>
     </div>
 
-    <div class="boards-info">Boards: 0/2</div>
+    <div class="timer-box" id="timer-display">
+        ጨዋታው በ <span id="countdown">40</span> ሰከንድ ውስጥ ይጀምራል...
+    </div>
+
+    <div class="boards-info" id="boardsCountText">Boards: 0/2</div>
 
     <div class="grid-container" id="boardsGrid"></div>
 
@@ -124,15 +138,49 @@
 
     <script>
         const grid = document.getElementById('boardsGrid');
+        const countText = document.getElementById('boardsCountText');
+        let selectedCount = 0;
+        let selectedBoards = [];
+
         for (let i = 1; i <= 400; i++) {
             const btn = document.createElement('button');
             btn.className = 'board-btn';
             btn.innerText = i;
+            
             btn.onclick = () => {
-                btn.classList.toggle('selected');
+                if (btn.classList.contains('selected')) {
+                    btn.classList.remove('selected');
+                    selectedCount--;
+                    selectedBoards = selectedBoards.filter(item => item !== i);
+                } else {
+                    if (selectedCount >= 2) {
+                        alert("ከ 2 ቦርድ በላይ መምረጥ አይችሉም!");
+                        return;
+                    }
+                    btn.classList.add('selected');
+                    selectedCount++;
+                    selectedBoards.push(i);
+                }
+                countText.innerText = `Boards: ${selectedCount}/2`;
             };
+            
             grid.appendChild(btn);
         }
+
+        let timeLeft = 40;
+        const countdownEl = document.getElementById("countdown");
+        const timerBox = document.getElementById("timer-display");
+
+        const timerInterval = setInterval(() => {
+            timeLeft--;
+            if (countdownEl) {
+                countdownEl.innerText = timeLeft;
+            }
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                timerBox.innerHTML = "<span style='color: #4cd137;'>ጨዋታው ጀምሯል!</span>";
+            }
+        }, 1000);
     </script>
 
 </body>
