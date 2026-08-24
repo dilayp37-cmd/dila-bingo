@@ -344,7 +344,7 @@
         <div class="top-stats">
             <div class="stat-box"><span>Game ID</span>DILA</div>
             <div class="stat-box" id="derash-box"><span>Derash</span>0</div>
-            <div class="stat-box" id="players-box"><span>Players</span>100</div>
+            <div class="stat-box" id="players-box"><span>Players</span>0</div>
             <div class="stat-box"><span>Bet</span>10</div>
             <div class="stat-box" id="call-box"><span>Call</span>0</div>
         </div>
@@ -369,6 +369,7 @@
                 <div class="controls-row">
                     <span>🔊 Sound</span>
                     <input type="checkbox" id="soundToggle" checked onchange="toggleSoundCheckbox()">
+                    <button onclick="testVoice()" style="background:#f39c12; color:white; border:none; padding:2px 5px; border-radius:3px; font-size:9px; cursor:pointer;">ድምጽ ፈትሽ</button>
                     <span>Auto</span>
                     <input type="checkbox" checked disabled>
                 </div>
@@ -442,7 +443,16 @@
             soundEnabled = document.getElementById('soundToggle').checked;
         }
 
-        // ፊደላቱን በአማረኛ ድምፅ እንዲጠራ ማስተካከያ (Amharic mapping)
+        // ድምጹን ለመፈተሽ የሚረዳ ቁልፍ (በስልክ ብሮውዘር እንዳይታፈን ይረዳል)
+        function testVoice() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                let utterance = new SpeechSynthesisUtterance("ቢ 1");
+                utterance.lang = 'am-ET';
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
         function getAmharicLetterName(letter) {
             switch(letter) {
                 case 'B': return 'ቢ';
@@ -454,30 +464,22 @@
             }
         }
 
-        // የአማረኛ ድምፅ ጥሪ ተግባር
         function speakNumber(letter, number) {
             if (!soundEnabled) return;
 
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
-
-                // የፊደሉን ስም ወደ አማረኛ በመቀየር (ለምሳሌ "ጂ 50")
                 let amharicLetter = getAmharicLetterName(letter);
                 const text = `${amharicLetter} ${number}`;
-
                 const utterance = new SpeechSynthesisUtterance(text);
-
-                // ቋንቋውን ወደ አማረኛ (am-ET) ማስተካከል
                 utterance.lang = 'am-ET';
-                utterance.rate = 0.75;
+                utterance.rate = 0.8;
                 utterance.pitch = 1;
                 utterance.volume = 1;
-
                 window.speechSynthesis.speak(utterance);
             }
         }
 
-        // ለተወሰነ ቦርድ ቁጥር 5x5 የቢንጎ ካርቴላ ማመንጨት (ልዩ ቁጥሮች በኮለም)
         function generateCartelaNumbers(boardId) {
             let randSeed = boardId * 997;
             function pseudoRandom(max) {
@@ -517,7 +519,6 @@
             return matrix;
         }
 
-        // 1 እስከ 400 ቦርዶችን ማዘጋጀት
         const grid = document.getElementById('boardsGrid');
         const countText = document.getElementById('boardsCountText');
         const playBtn = document.getElementById('playNowBtn');
@@ -550,7 +551,6 @@
             grid.appendChild(btn);
         }
 
-        // ራስ-ሰር የሰአት ቆጣሪ (Timer 15 seconds)
         let timeLeft = 15;
         const countdownEl = document.getElementById("countdown");
         const timerInterval = setInterval(() => {
@@ -664,9 +664,14 @@
                 }
             });
 
-            let totalPlayers = 100;
-            let totalPool = totalPlayers * 10;
-            let derashAmount = totalPool - (totalPool * 0.25);
+            // የደርሽ ሂሳብ ከተጫዋቾች ብዛት እና ከተመረጡት ቦርዶች ጋር እንዲለዋወጥ ተደርጓል
+            let totalPlayers = Math.floor(Math.random() * 40) + 70; // ከ 70 እስከ 110 ተጫዋቾች በዘፈቀደ
+            let botBoardsCount = totalPlayers * 2; // አርቴፊሻል ተጫዋቾች የያዟቸው ቦርዶች
+            let allActiveBoardsCount = botBoardsCount + selectedBoards.length;
+            
+            let totalPool = allActiveBoardsCount * stakePerBoard;
+            let derashAmount = totalPool - (totalPool * 0.25); // 25% ቤት ሲቀነስ
+            
             document.getElementById('derash-box').innerHTML = `<span>Derash</span>${derashAmount}`;
             document.getElementById('players-box').innerHTML = `<span>Players</span>${totalPlayers}`;
 
@@ -693,7 +698,7 @@
             }
 
             if(isMarked(matrix[0][0]) && isMarked(matrix[1][1]) && isMarked(matrix[2][2]) && isMarked(matrix[3][3]) && isMarked(matrix[4][4])) {
-                return true
+                return true;
             }
 
             if(isMarked(matrix[0][4]) && isMarked(matrix[1][3]) && isMarked(matrix[2][2]) && isMarked(matrix[3][1]) && isMarked(matrix[4][0])) {
@@ -734,7 +739,6 @@
                     cells[randomNum].element.classList.add('active');
                     let letter = cells[randomNum].letter;
                     
-                    // ቁጥሩን እና ፊደሉን በአማረኛ ድምፅ ይጠራል
                     speakNumber(letter, randomNum);
 
                     selectedBoards.forEach(bId => {
