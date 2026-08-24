@@ -1,39 +1,3 @@
-            padding: 8px;
-        }
-        .board h3 {
-            font-size: 14px;
-            margin: 5px 0;
-            color: #ffd700;
-        }
-        .board table {
-            width: 100%;
-            border-collapse: collapse;
-            background: #fff;
-            color: #000;
-            font-size: 11px;
-        }
-        .board th, .board td {
-            border: 1px solid #4a1535;
-            text-align: center;
-            padding: 3px;
-        }
-        .board th {
-            background: #802050;
-            color: #fff;
-        }
-    </style>
-</head>
-<body>
-
-    <h1>Dila Bingo</h1>
-    
-    <div id="timer-box">
-        ጨዋታው በ <span id="countdown">40</span> ሰከንድ ውስጥ ይጀምራል...
-    </div>
-
-    <div class="boards-container">
-        <script>
-            for(let i=1; i<=400; i++) {
                 document.write(`
                     <div class="board">
                         <h3>ቦርድ #${i}</h3>
