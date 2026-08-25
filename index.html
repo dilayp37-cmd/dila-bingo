@@ -426,7 +426,12 @@
     </div>
 
     <script>
-        let userWallet = localStorage.getItem('dila_wallet') !== null ? parseInt(localStorage.getItem('dila_wallet')) : 54;
+        // ከ URL ላይ የባላንስ መረጃን የሚቀበል ኮድ
+        const urlParams = new URLSearchParams(window.location.search);
+        let initialBalance = urlParams.get('balance');
+
+        let userWallet = initialBalance !== null ? parseInt(initialBalance) : (localStorage.getItem('dila_wallet') !== null ? parseInt(localStorage.getItem('dila_wallet')) : 54);
+        
         let gameHistory = JSON.parse(localStorage.getItem('dila_history')) || [];
         let stakePerBoard = 10;
         let soundEnabled = true;
@@ -443,7 +448,6 @@
             soundEnabled = document.getElementById('soundToggle').checked;
         }
 
-        // የድምጽ ምርመራ በአማርኛ ቃላት ተዘጋጅቷል
         function testVoice() {
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
@@ -453,7 +457,6 @@
             }
         }
 
-        // ቁጥሮችን እና ፊደላትን በአማርኛ ሙሉ ቃላት እንዲነበብ የሚቀይር ፋንክሽን
         function getAmharicWordNumber(num) {
             const amharicNumbers = {
                 1: "አንድ", 2: "ሁለት", 3: "ሶስት", 4: "አራት", 5: "አንስት", 6: "ስድስት", 7: "ሰባት", 8: "ስምንት", 9: "ዘጠኝ", 10: "አስር",
@@ -487,7 +490,6 @@
                 let amharicLetter = getAmharicLetterName(letter);
                 let amharicNumberWord = getAmharicWordNumber(number);
                 
-                // ስልኩ ቁጥሩን በእንግሊዝኛ እንዳያነበው በአማርኛ ቃላት ተሰርቷል (ለምሳሌ: "ቢ ሃያ አራት")
                 const text = `${amharicLetter} ${amharicNumberWord}`;
                 const utterance = new SpeechSynthesisUtterance(text);
                 
@@ -816,8 +818,3 @@
     </script>
 </body>
 </html>
-// ከ URL ላይ የባላንስ መረጃን የሚቀበል ኮድ
-const urlParams = new URLSearchParams(window.location.search);
-let initialBalance = urlParams.get('balance');
-
-let userWallet = initialBalance !== null ? parseInt(initialBalance) : (localStorage.getItem('dila_wallet') !== null ? parseInt(localStorage.getItem('dila_wallet')) : 54);
