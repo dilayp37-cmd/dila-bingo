@@ -210,8 +210,6 @@
             font-size: 11px;
             font-weight: bold;
         }
-        
-        /* የተመረጡት ቦርዶች በሰፊው እና በንጹህ ሁኔታ እንዲታዩ */
         .cartelas-scroll-container {
             max-height: 350px;
             overflow-y: auto;
@@ -254,7 +252,6 @@
             background: #2ecc71;
             color: #ffd700;
         }
-
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -315,7 +312,6 @@
 </head>
 <body>
 
-    <!-- ገጽ 1፡ የቦርድ መራጫ -->
     <div id="selection-screen">
         <div class="header-top">
             <div class="title">Dila Bingo</div>
@@ -333,11 +329,9 @@
         </div>
 
         <div class="boards-info" id="boardsCountText">Boards: 0 | Total: 0 ብር</div>
-
         <div class="grid-container" id="boardsGrid"></div>
     </div>
 
-    <!-- ገጽ 2፡ የጨዋታ ማያ ገጽ -->
     <div id="game-screen" class="game-screen">
         <div class="top-stats">
             <div class="stat-box"><span>Game ID</span>DILA</div>
@@ -348,12 +342,10 @@
         </div>
 
         <div class="game-layout">
-            <!-- የቁጥሮች ጠረጴዛ -->
             <table class="caller-table" id="callerTable">
                 <tr><th>ቢ</th><th>አይ</th><th>ኤን</th><th>ጂ</th><th>ኦ</th></tr>
             </table>
 
-            <!-- አሁን የተጠራ ቁጥር እና የቅርብ ጊዜ ቁጥሮች -->
             <div class="active-call-section">
                 <div>
                     <div style="font-size: 10px; color: #ddd;">Current Call</div>
@@ -376,12 +368,10 @@
                 <span>Auto BINGO</span>
             </div>
 
-            <!-- የተመረጡት በርካታ ቦርዶች ካርቴላዎች እዚህ ይደረደራሉ (ማሸብለል የሚችል) -->
             <div class="cartelas-scroll-container" id="selectedCartelasContainer"></div>
         </div>
     </div>
 
-    <!-- BINGO ሞዳል -->
     <div id="bingoModal" class="modal">
         <div class="modal-content">
             <div class="bingo-alert-text">🎉 BINGO! 🎉</div>
@@ -390,7 +380,6 @@
         </div>
     </div>
 
-    <!-- የታችኛው አሰሳ ሜኑ -->
     <div class="bottom-nav">
         <div class="nav-item active" onclick="showScreen('selection')">🏠<br>BINGO</div>
         <div class="nav-item" onclick="openModal('historyModal')">🕒<br>HISTORY</div>
@@ -398,7 +387,6 @@
         <div class="nav-item" onclick="openModal('profileModal')">👤<br>PROFILE</div>
     </div>
 
-    <!-- ሞዳሎች -->
     <div id="historyModal" class="modal">
         <div class="modal-content">
             <h3>የጨዋታ ታሪክ</h3>
