@@ -816,3 +816,8 @@
     </script>
 </body>
 </html>
+// ከ URL ላይ የባላንስ መረጃን የሚቀበል ኮድ
+const urlParams = new URLSearchParams(window.location.search);
+let initialBalance = urlParams.get('balance');
+
+let userWallet = initialBalance !== null ? parseInt(initialBalance) : (localStorage.getItem('dila_wallet') !== null ? parseInt(localStorage.getItem('dila_wallet')) : 54);
