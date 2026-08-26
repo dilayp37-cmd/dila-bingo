@@ -316,7 +316,7 @@
         <div class="header-top">
             <div class="title">Dila Bingo</div>
             <div class="stats-box">
-                <div class="stat-card" onclick="openModal('walletModal')"><span>Wallet</span><span id="walletDisp">54</span></div>
+                <div class="stat-card" onclick="openModal('walletModal')"><span>Wallet</span><span id="walletDisp">0</span></div>
                 <div class="stat-card"><span>Stake</span>10</div>
             </div>
         </div>
@@ -400,7 +400,7 @@
     <div id="walletModal" class="modal">
         <div class="modal-content">
             <h3>የእርስዎ ቦርሳ (Wallet)</h3>
-            <p style="font-size: 15px; color: #ffd700; font-weight: bold; margin: 8px 0;">ቀሪ ሂሳብ: <span id="modalWalletDisp">54</span> ብር</p>
+            <p style="font-size: 15px; color: #ffd700; font-weight: bold; margin: 8px 0;">ቀሪ ሂሳብ: <span id="modalWalletDisp">0</span> ብር</p>
             <button class="close-btn" onclick="depositMoney()" style="background:#f39c12; margin-bottom: 5px; width: 100%;">ብር ጫን (Deposit +50 ብር)</button>
             <button class="close-btn" onclick="closeModal('walletModal')" style="background:#ff4d4d; width: 100%;">ዝጋ</button>
         </div>
@@ -418,7 +418,7 @@
         const urlParams = new URLSearchParams(window.location.search);
         let initialBalance = urlParams.get('balance');
 
-        let userWallet = initialBalance !== null ? parseInt(initialBalance) : (localStorage.getItem('dila_wallet') !== null ? parseInt(localStorage.getItem('dila_wallet')) : 54);
+        let userWallet = initialBalance !== null ? parseInt(initialBalance) : (localStorage.getItem('dila_wallet') !== null ? parseInt(localStorage.getItem('dila_wallet')) : 0);
         
         let gameHistory = JSON.parse(localStorage.getItem('dila_history')) || [];
         let stakePerBoard = 10;
@@ -545,6 +545,10 @@
                     selectedBoards = selectedBoards.filter(item => item !== i);
                     btn.classList.remove('selected');
                 } else {
+                    if (selectedBoards.length >= 2) {
+                        alert("ቢበዛ መያዝ የሚችሉት 2 ካርቴላ ብቻ ነው!");
+                        return;
+                    }
                     selectedBoards.push(i);
                     btn.classList.add('selected');
                 }
