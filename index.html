@@ -316,7 +316,7 @@
         <div class="header-top">
             <div class="title">Dila Bingo</div>
             <div class="stats-box">
-                <div class="stat-card" onclick="openModal('walletModal')"><span>Wallet</span><span id="walletDisp">0</span></div>
+                <div class="stat-card" onclick="openModal('walletModal')"><span>Wallet</span><span id="walletDisp">10</span></div>
                 <div class="stat-card"><span>Stake</span>10</div>
             </div>
         </div>
@@ -400,8 +400,8 @@
     <div id="walletModal" class="modal">
         <div class="modal-content">
             <h3>የእርስዎ ቦርሳ (Wallet)</h3>
-            <p style="font-size: 15px; color: #ffd700; font-weight: bold; margin: 8px 0;">ቀሪ ሂሳብ: <span id="modalWalletDisp">0</span> ብር</p>
-            <button class="close-btn" onclick="depositMoney()" style="background:#f39c12; margin-bottom: 5px; width: 100%;">ብር ጫን (Deposit +50 ብር)</button>
+            <p style="font-size: 15px; color: #ffd700; font-weight: bold; margin: 8px 0;">ቀሪ ሂሳብ: <span id="modalWalletDisp">10</span> ብር</p>
+            <button class="close-btn" onclick="depositMoney()" style="background:#f39c12; margin-bottom: 5px; width: 100%;">ብር ጫን (Telebirr +50 ብር)</button>
             <button class="close-btn" onclick="closeModal('walletModal')" style="background:#ff4d4d; width: 100%;">ዝጋ</button>
         </div>
     </div>
@@ -418,7 +418,8 @@
         const urlParams = new URLSearchParams(window.location.search);
         let initialBalance = urlParams.get('balance');
 
-        let userWallet = initialBalance !== null ? parseInt(initialBalance) : (localStorage.getItem('dila_wallet') !== null ? parseInt(localStorage.getItem('dila_wallet')) : 0);
+        // አዲስ ተጠቃሚ ሲመዘገብ 10 ብር ቦነስ ይሰጠዋል (localStorage ላይ ከሌለ 10 ይጀምራል)
+        let userWallet = initialBalance !== null ? parseInt(initialBalance) : (localStorage.getItem('dila_wallet') !== null ? parseInt(localStorage.getItem('dila_wallet')) : 10);
         
         let gameHistory = JSON.parse(localStorage.getItem('dila_history')) || [];
         let stakePerBoard = 10;
@@ -452,7 +453,7 @@
                 21: "ሃያ አንድ", 22: "ሃያ ሁለት", 23: "ሃያ ሶስት", 24: "ሃያ አራት", 25: "ሃያ አምስት", 26: "ሃያ ስድስት", 27: "ሃያ ሰባት", 28: "ሃያ ስምንት", 29: "ሃያ ዘጠኝ", 30: "ሰላሳ",
                 31: "ሰላሳ አንድ", 32: "ሰላሳ ሁለት", 33: "ሰላሳ ሶስት", 34: "ሰላሳ አራት", 35: "ሰላሳ አምስት", 36: "ሰላሳ ስድስት", 37: "ሰላሳ ሰባት", 38: "ሰላሳ ስምንት", 39: "ሰላሳ ዘጠኝ", 40: "አርባ",
                 41: "አርባ አንድ", 42: "አርባ ሁለት", 43: "አርባ ሶስት", 44: "አርባ አራት", 45: "አርባ አምስት", 46: "አርባ ስድስት", 47: "አርባ ሰባት", 48: "አርባ ስምንት", 49: "አርባ ዘጠኝ", 50: "ኃምሳ",
-                51: "ኃምሳ አንድ", 52: "ኃምሳ ሁለት", 53: "ኃምሳ ሶስት", 54: "ኃምሳ አራት", 55: "ኃምሳ አምስት", 56: "ኃምሳ ስድስት", 57: "ኃምሳ ሰባት", 58: "ኃምሳ ስምንት", 59: "ኃምሳ ዘጠኝ", 60: "ስድሳ",
+                51: "ኃምሳ አንድ", 52: "ኃምሳ ሁለት", 53: "ኃምሳ ሶስት", 54: "ኃምሳ አምስት", 55: "ኃምሳ አምስት", 56: "ኃምሳ ስድስት", 57: "ኃምሳ ሰባት", 58: "ኃምሳ ስምንት", 59: "ኃምሳ ዘጠኝ", 60: "ስድሳ",
                 61: "ስድሳ አንድ", 62: "ስድሳ ሁለት", 63: "ስድሳ ሶስት", 64: "ስድሳ አራት", 65: "ስድሳ አምስት", 66: "ስድሳ ስድስት", 67: "ስድሳ ሰባት", 68: "ስድሳ ስምንት", 69: "ስድሳ ዘጠኝ", 70: "ሰባ",
                 71: "ሰባ አንድ", 72: "ሰባ ሁለት", 73: "ሰባ ሶስት", 74: "ሰባ አራት", 75: "ሰባ አምስት"
             };
@@ -565,6 +566,7 @@
             grid.appendChild(btn);
         }
 
+        // የ 15 ሰከንድ ቆጣሪ - ሲጠናቀቅ በራሱ ወደ ጨዋታው ይገባል
         let timeLeft = 15;
         const countdownEl = document.getElementById("countdown");
         const timerInterval = setInterval(() => {
@@ -576,11 +578,10 @@
                 clearInterval(timerInterval);
                 if (!gameStarted) {
                     if (selectedBoards.length === 0) {
-                        alert("እባክዎ ቢያንስ 1 board ይምረጡ");
-                        timeLeft = 15; 
-                    } else {
-                        confirmAndPlay();
+                        // ካርቴላ ካልመረጠ በራሱ 1 ቦርድ መርጦ እንዲጀምር ይደረጋል
+                        selectedBoards = [1];
                     }
+                    confirmAndPlay();
                 }
             }
         }, 1000);
@@ -588,14 +589,13 @@
         function confirmAndPlay() {
             if (gameStarted) return;
             if (selectedBoards.length === 0) {
-                alert("እባክዎ ቢያንስ 1 board ይምረጡ");
-                return;
+                selectedBoards = [1]; // ነባሪ 1 ካርቴላ
             }
 
             let totalCost = selectedBoards.length * stakePerBoard;
 
             if (userWallet < totalCost) {
-                alert("በቦርሳዎ ውስጥ በቂ ብር የለም! እባክዎ ብር ይጫኑ (Deposit)።");
+                alert("በቦርሳዎ ውስጥ በቂ ብር የለም! እባክዎ በቴሌብር ብር ይጫኑ።");
                 openModal('walletModal');
                 return;
             }
@@ -614,10 +614,10 @@
         }
 
         function depositMoney() {
-            userWallet += 50;
+            userWallet += 50; // በቴሌብር የሚጫነው የብር መጠን
             localStorage.setItem('dila_wallet', userWallet);
             updateWalletUI();
-            alert("50 ብር በተሳካ ሁኔታ ተጭኗል!");
+            alert("በቴሌብር 50 ብር በተሳካ ሁኔታ ተጭኗል!");
             closeModal('walletModal');
         }
 
