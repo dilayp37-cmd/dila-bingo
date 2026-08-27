@@ -415,11 +415,15 @@
     </div>
 
     <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        let initialBalance = urlParams.get('balance');
-
-        // አዲስ ተጠቃሚ ሲመዘገብ 10 ብር ቦነስ ይሰጠዋል (localStorage ላይ ከሌለ 10 ይጀምራል)
-        let userWallet = initialBalance !== null ? parseInt(initialBalance) : (localStorage.getItem('dila_wallet') !== null ? parseInt(localStorage.getItem('dila_wallet')) : 10);
+        // የድሮውን የቦርሳ ቆሻሻ ዳታ በማጽዳት ሁልጊዜ 10 ብር እንዲጀምር ተደረገ
+        let userWallet = 10;
+        if (!localStorage.getItem('dila_fresh_start')) {
+            localStorage.setItem('dila_wallet', 10);
+            localStorage.setItem('dila_fresh_start', 'true');
+        } else {
+            let savedWallet = localStorage.getItem('dila_wallet');
+            userWallet = savedWallet !== null ? parseInt(savedWallet) : 10;
+        }
         
         let gameHistory = JSON.parse(localStorage.getItem('dila_history')) || [];
         let stakePerBoard = 10;
@@ -578,8 +582,7 @@
                 clearInterval(timerInterval);
                 if (!gameStarted) {
                     if (selectedBoards.length === 0) {
-                        // ካርቴላ ካልመረጠ በራሱ 1 ቦርድ መርጦ እንዲጀምር ይደረጋል
-                        selectedBoards = [1];
+                        selectedBoards = [1]; // ካርቴላ ካልመረጠ በራሱ 1 ቦርድ መርጦ እንዲጀምር ይደረጋል
                     }
                     confirmAndPlay();
                 }
@@ -589,7 +592,7 @@
         function confirmAndPlay() {
             if (gameStarted) return;
             if (selectedBoards.length === 0) {
-                selectedBoards = [1]; // ነባሪ 1 ካርቴላ
+                selectedBoards = [1];
             }
 
             let totalCost = selectedBoards.length * stakePerBoard;
@@ -614,7 +617,7 @@
         }
 
         function depositMoney() {
-            userWallet += 50; // በቴሌብር የሚጫነው የብር መጠን
+            userWallet += 50; 
             localStorage.setItem('dila_wallet', userWallet);
             updateWalletUI();
             alert("በቴሌብር 50 ብር በተሳካ ሁኔታ ተጭኗል!");
