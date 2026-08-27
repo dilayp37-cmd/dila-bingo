@@ -415,11 +415,10 @@
     </div>
 
     <script>
-        // የድሮውን የቦርሳ ቆሻሻ ዳታ በማጽዳት ሁልጊዜ 10 ብር እንዲጀምር ተደረገ
         let userWallet = 10;
-        if (!localStorage.getItem('dila_fresh_start')) {
+        if (!localStorage.getItem('dila_v3_fresh')) {
             localStorage.setItem('dila_wallet', 10);
-            localStorage.setItem('dila_fresh_start', 'true');
+            localStorage.setItem('dila_v3_fresh', 'true');
         } else {
             let savedWallet = localStorage.getItem('dila_wallet');
             userWallet = savedWallet !== null ? parseInt(savedWallet) : 10;
@@ -570,7 +569,6 @@
             grid.appendChild(btn);
         }
 
-        // የ 15 ሰከንድ ቆጣሪ - ሲጠናቀቅ በራሱ ወደ ጨዋታው ይገባል
         let timeLeft = 15;
         const countdownEl = document.getElementById("countdown");
         const timerInterval = setInterval(() => {
@@ -582,7 +580,7 @@
                 clearInterval(timerInterval);
                 if (!gameStarted) {
                     if (selectedBoards.length === 0) {
-                        selectedBoards = [1]; // ካርቴላ ካልመረጠ በራሱ 1 ቦርድ መርጦ እንዲጀምር ይደረጋል
+                        selectedBoards = [1];
                     }
                     confirmAndPlay();
                 }
@@ -681,12 +679,11 @@
                 }
             });
 
-            let totalPlayers = Math.floor(Math.random() * 40) + 70;
-            let botBoardsCount = totalPlayers * 2;
-            let allActiveBoardsCount = botBoardsCount + selectedBoards.length;
-            
-            let totalPool = allActiveBoardsCount * stakePerBoard;
+            // እዚህ ላይ ከተመረጠው የካርቴላ ብዛት (selectedBoards.length) ጋር ብቻ የሚመጣጠን ተጫዋች እና ትክክለኛ ደራሽ እንዲሰላ ተደረገ
+            let totalPlayers = selectedBoards.length; 
+            let totalPool = totalPlayers * stakePerBoard;
             let derashAmount = totalPool - (totalPool * 0.25);
+            if (derashAmount < 10) derashAmount = totalPool; // አነስተኛ ገደብ
             
             document.getElementById('derash-box').innerHTML = `<span>Derash</span>${derashAmount}`;
             document.getElementById('players-box').innerHTML = `<span>Players</span>${totalPlayers}`;
@@ -803,6 +800,10 @@
                 listEl.innerHTML = "ምንም የጨዋታ ታሪክ የለም።";
             }
         }
+
+        (function autoStartCheck() {
+            // ተጨማሪ የማስተካከያ አውቶ ስታርት
+        })();
 
         function openModal(modalId) {
             document.getElementById(modalId).style.display = 'flex';
