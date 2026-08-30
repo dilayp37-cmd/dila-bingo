@@ -313,7 +313,6 @@
 </head>
 <body>
 
-    <!-- SCREEN 1: BINGO SELECTION -->
     <div id="selection-screen">
         <div class="header-top">
             <div class="title">Bankeruto Bingo</div>
@@ -336,7 +335,6 @@
         <div class="grid-container" id="boardsGrid"></div>
     </div>
 
-    <!-- SCREEN 2: ACTIVE GAME -->
     <div id="game-screen" class="game-screen">
         <div class="top-stats">
             <div class="stat-box"><span>Game ID</span>MBR9</div>
@@ -377,7 +375,6 @@
         </div>
     </div>
 
-    <!-- BINGO WIN MODAL -->
     <div id="bingoModal" class="modal">
         <div class="modal-content">
             <div class="bingo-alert-text">🎉 BINGO! 🎉</div>
@@ -386,7 +383,6 @@
         </div>
     </div>
 
-    <!-- BOTTOM NAVIGATION -->
     <div class="bottom-nav">
         <div class="nav-item active" onclick="switchTab('bingo')">🏠<br>BINGO</div>
         <div class="nav-item" onclick="openModal('historyModal')">🕒<br>HISTORY</div>
@@ -394,7 +390,6 @@
         <div class="nav-item" onclick="openModal('profileModal')">👤<br>PROFILE</div>
     </div>
 
-    <!-- HISTORY MODAL -->
     <div id="historyModal" class="modal">
         <div class="modal-content" style="max-width: 300px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
@@ -408,7 +403,6 @@
         </div>
     </div>
 
-    <!-- WALLET MODAL -->
     <div id="walletModal" class="modal">
         <div class="modal-content">
             <h3 style="margin-top:0;">WALLET</h3>
@@ -421,7 +415,6 @@
             <button class="close-btn" onclick="openDepositModal()" style="background:#f39c12; margin-bottom: 5px; width: 100%;">ብር ጫን (Deposit via Telebirr)</button>
             <button class="close-btn" onclick="openWithdrawModal()" style="background:#2980b9; margin-bottom: 5px; width: 100%;">ငွေ አውጣ (Withdraw)</button>
             
-            <!-- ADMIN CONTROLS (ለአንተ ብቻ የሚታይ የባለቤት/አድሚን ማስተካከያ) -->
             <div style="margin-top: 15px; border-top: 1px dashed #ffd700; padding-top: 8px;">
                 <div style="font-size: 10px; color: #ffd700; margin-bottom: 4px;">⚙️ Admin Panel (ብር ለመሙላት)</div>
                 <input type="number" id="adminAddAmt" placeholder="የብር መጠን" style="width: 80%; padding: 4px; font-size: 11px; border-radius: 4px; border: none; text-align: center;">
@@ -432,29 +425,28 @@
         </div>
     </div>
 
-    <!-- DEPOSIT MODAL -->
     <div id="depositModal" class="modal">
         <div class="modal-content">
             <h3>DEPOSIT REQUEST</h3>
-            <p style="font-size: 11px; color:#ddd;">የሚከፍሉትን የብር መጠን ያስገቡ። ክፍያውን ከፈጸሙ በኋላ አስተዳዳሪው ያረጋግጥልዎታል:</p>
-            <input type="number" id="depositAmountInput" placeholder="የብር መጠን (ለምሳሌ 50)" style="width: 90%; padding: 8px; border-radius: 5px; border: none; text-align: center; margin-bottom: 10px; font-weight: bold;">
-            <button class="close-btn" onclick="submitDepositRequest()" style="background:#2ecc71; width:100%;">ጥያቄ ላክ</button>
+            <p style="font-size: 11px; color:#ddd;">የላኩትን የብር መጠን እና የቴሌብር SMS/መረጃ በማስገባት ለአስተዳዳሪው ያሳውቁ:</p>
+            <input type="number" id="depositAmountInput" placeholder="የብር መጠን (ለምሳሌ 40)" style="width: 90%; padding: 8px; border-radius: 5px; border: none; text-align: center; margin-bottom: 8px; font-weight: bold;">
+            <input type="text" id="depositRefInput" placeholder="የቴሌብር የግብይት ቁጥር (Transaction ID)" style="width: 90%; padding: 8px; border-radius: 5px; border: none; text-align: center; margin-bottom: 10px; font-weight: bold; font-size: 11px;">
+            <button class="close-btn" onclick="submitDepositRequest()" style="background:#2ecc71; width:100%;">ጥያቄ እና ማሳወቂያ ላክ</button>
             <button class="close-btn" onclick="closeModal('depositModal')" style="background:#ff4d4d; width:100%;">ሰርዝ</button>
         </div>
     </div>
 
-    <!-- WITHDRAW MODAL -->
     <div id="withdrawModal" class="modal">
         <div class="modal-content">
             <h3>WITHDRAW REQUEST</h3>
-            <p style="font-size: 11px; color:#ddd;">ማውጣት የሚፈልጉትን የብር መጠን ያስገቡ:</p>
-            <input type="number" id="withdrawAmountInput" placeholder="የብር መጠን" style="width: 90%; padding: 8px; border-radius: 5px; border: none; text-align: center; margin-bottom: 10px; font-weight: bold;">
-            <button class="close-btn" onclick="submitWithdrawRequest()" style="background:#2980b9; width:100%;">ጥያቄ ላክ</button>
+            <p style="font-size: 11px; color:#ddd;">ማውጣት የሚፈልጉትን የብር መጠን እና የቴሌብር ስልክ ቁጥር ያስገቡ:</p>
+            <input type="number" id="withdrawAmountInput" placeholder="የብር መጠን" style="width: 90%; padding: 8px; border-radius: 5px; border: none; text-align: center; margin-bottom: 8px; font-weight: bold;">
+            <input type="text" id="withdrawPhoneInput" placeholder="የቴሌብር ስልክ ቁጥር (09...)" style="width: 90%; padding: 8px; border-radius: 5px; border: none; text-align: center; margin-bottom: 10px; font-weight: bold; font-size: 11px;">
+            <button class="close-btn" onclick="submitWithdrawRequest()" style="background:#2980b9; width:100%;">የዊዝድሮ ጥያቄ ላክ</button>
             <button class="close-btn" onclick="closeModal('withdrawModal')" style="background:#ff4d4d; width:100%;">ሰርዝ</button>
         </div>
     </div>
 
-    <!-- PROFILE MODAL -->
     <div id="profileModal" class="modal">
         <div class="modal-content">
             <h3 style="margin-top:0;">ACCOUNT PROFILE</h3>
@@ -491,7 +483,7 @@
             const amharicNumbers = {
                 1: "አንድ", 2: "ሁለት", 3: "ሶስት", 4: "አራት", 5: "አምስት", 6: "ስድስት", 7: "ሰባት", 8: "ስምንት", 9: "ዘጠኝ", 10: "አስር",
                 11: "አስራ አንድ", 12: "አስራ ሁለት", 13: "አስራ ሶስት", 14: "አስራ አራት", 15: "አስራ አምስት", 16: "አስራ ስድስት", 17: "አስራ ሰባት", 18: "አስራ ስምንት", 19: "አስራ ዘጠኝ", 20: "ሃያ",
-                30: "ሰላሳ", 40: "አርባ", 50: "ኃምሳ", 60: "ስድሳ", 70: "ሰባ", 75: "ሰባ አምስት"
+                30: "ሰላሳ", 32: "ሰላሳ ሁለት", 40: "አርባ", 50: "ኃምሳ", 60: "ስድሳ", 70: "ሰባ", 75: "ሰባ አምስት"
             };
             if (amharicNumbers[num]) return amharicNumbers[num];
             let tens = Math.floor(num / 10) * 10;
@@ -568,8 +560,9 @@
                 }
                 countText.innerText = `Boards: ${selectedBoards.length}/2`;
                 
-                // የ 20% ቅናሽ ተደርጎ የሚታየው እውነተኛ ደራሽ
-                let rawPool = (selectedBoards.length + 3) * stakePerBoard; 
+                // የተጫዋቾች ብዛት በእጅ የተያዙት የቦርድ ብዛት (ካርቴላዎች) ይሆናል
+                let activePlayersCount = selectedBoards.length > 0 ? selectedBoards.length : 1;
+                let rawPool = activePlayersCount * stakePerBoard; 
                 let finalPool = rawPool * 0.8;
                 derashText.innerText = `ደራሽ: ${finalPool} ብር`;
             };
@@ -607,8 +600,9 @@
             saveWalletData();
             gameStarted = true;
             
-            let simulatedPlayers = selectedBoards.length + Math.floor(Math.random() * 4) + 2; 
-            let rawPool = simulatedPlayers * stakePerBoard;
+            // የተጫዋቾች ብዛት በትክክል በተጫዋቹ የተያዙ ቦርዶች/ካርቴላዎች ብዛት ይወሰናል
+            let activePlayersCount = selectedBoards.length;
+            let rawPool = activePlayersCount * stakePerBoard;
             let derashAmount = rawPool * 0.8; // 20% ለአስተዳዳሪው ተቀንሶ ለአሸናፊው የሚቀረው
 
             document.getElementById('selection-screen').style.display = 'none';
@@ -647,7 +641,7 @@
             });
 
             document.getElementById('derash-box').innerHTML = `<span>Derash</span>${derashAmount}`;
-            document.getElementById('players-box').innerHTML = `<span>Players</span>${simulatedPlayers}`;
+            document.getElementById('players-box').innerHTML = `<span>Players</span>${activePlayersCount}`;
 
             startCallingNumbers(derashAmount);
         }
@@ -686,11 +680,12 @@
 
         function submitDepositRequest() {
             let amount = document.getElementById('depositAmountInput').value;
-            if (!amount || amount <= 0) {
-                alert("እባክዎ የብር መጠን ያስገቡ!");
+            let refId = document.getElementById('depositRefInput').value;
+            if (!amount || amount <= 0 || !refId) {
+                alert("እባክዎ የብር መጠኑን እና የግብይት ቁጥር (Transaction ID) በትክክል ይሙሉ!");
                 return;
             }
-            alert(`የ ${amount} ብር የዲፖዚት ጥያቄዎ ተልኳል። አስተዳዳሪው ክፍያውን ሲያረጋግጥ ዋሌትዎ ላይ ይጨመራል።`);
+            alert(`የ ${amount} ብር የዲፖዚት ማሳወቂያዎ (Ref: ${refId}) ወደ አስተዳዳሪው ተልኳል። አስተዳዳሪው የቴሌብር መልእክቱን አረጋግጦ ዋሌትዎን ይሞላልዎታል።`);
             closeModal('depositModal');
             openModal('walletModal');
         }
@@ -702,8 +697,9 @@
 
         function submitWithdrawRequest() {
             let amount = parseInt(document.getElementById('withdrawAmountInput').value);
-            if (isNaN(amount) || amount <= 0) {
-                alert("እባክዎ ትክክለኛ መጠን ያስገቡ!");
+            let phone = document.getElementById('withdrawPhoneInput').value;
+            if (isNaN(amount) || amount <= 0 || !phone) {
+                alert("እባክዎ የብር መጠን እና ስልክ ቁጥር ያስገቡ!");
                 return;
             }
             if (amount > userWallet) {
@@ -713,7 +709,7 @@
             userWallet -= amount;
             totalWithdrawal += amount;
             saveWalletData();
-            alert(`የ ${amount} ብር የዊዝድሮ ጥያቄዎ ተልኳል! ገንዘቡን በቴሌብር እንልክልዎታለን።`);
+            alert(`የ ${amount} ብር የዊዝድሮ ጥያቄ ወደ ስልክ ቁጥር ${phone} ተልኳል! ገንዘቡ በቅርብ ይላክልዎታል።`);
             closeModal('withdrawModal');
             openModal('walletModal');
         }
