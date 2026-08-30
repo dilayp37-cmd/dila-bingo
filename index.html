@@ -325,7 +325,6 @@
 </head>
 <body>
 
-    <!-- SCREEN 1: BINGO SELECTION -->
     <div id="selection-screen">
         <div class="header-top">
             <div class="title">Bankeruto Bingo</div>
@@ -346,7 +345,6 @@
         <div class="grid-container" id="boardsGrid"></div>
     </div>
 
-    <!-- SCREEN 2: ACTIVE GAME -->
     <div id="game-screen" class="game-screen">
         <div class="top-stats">
             <div class="stat-box"><span>Game ID</span>MBR9</div>
@@ -387,7 +385,6 @@
         </div>
     </div>
 
-    <!-- BINGO WIN MODAL -->
     <div id="bingoModal" class="modal">
         <div class="modal-content">
             <div class="bingo-alert-text">🎉 BINGO! 🎉</div>
@@ -396,7 +393,6 @@
         </div>
     </div>
 
-    <!-- BOTTOM NAVIGATION -->
     <div class="bottom-nav">
         <div class="nav-item active" onclick="switchTab('bingo')">🏠<br>BINGO</div>
         <div class="nav-item" onclick="openModal('historyModal')">🕒<br>HISTORY</div>
@@ -404,7 +400,6 @@
         <div class="nav-item" onclick="openModal('profileModal')">👤<br>PROFILE</div>
     </div>
 
-    <!-- HISTORY MODAL -->
     <div id="historyModal" class="modal">
         <div class="modal-content" style="max-width: 300px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
@@ -418,7 +413,6 @@
         </div>
     </div>
 
-    <!-- WALLET MODAL -->
     <div id="walletModal" class="modal">
         <div class="modal-content">
             <h3 style="margin-top:0;">WALLET</h3>
@@ -439,18 +433,16 @@
         </div>
     </div>
 
-    <!-- DEPOSIT MODAL -->
     <div id="depositModal" class="modal">
         <div class="modal-content">
             <h3>DEPOSIT</h3>
             <p style="font-size: 11px; color:#ddd;">የሚከፍሉትን የብር መጠን ያስገቡ (በቴሌብር):</p>
-            <input type="number" id="depositAmountInput" placeholder="የብር መጠን (לχ 50)" style="width: 90%; padding: 8px; border-radius: 5px; border: none; text-align: center; margin-bottom: 10px; font-weight: bold;">
+            <input type="number" id="depositAmountInput" placeholder="የብር መጠን (ለምሳሌ 50)" style="width: 90%; padding: 8px; border-radius: 5px; border: none; text-align: center; margin-bottom: 10px; font-weight: bold;">
             <button class="close-btn" onclick="confirmDeposit()" style="background:#2ecc71; width:100%;">አረጋግጥ (Confirm)</button>
             <button class="close-btn" onclick="closeModal('depositModal')" style="background:#ff4d4d; width:100%;">ሰርዝ</button>
         </div>
     </div>
 
-    <!-- WITHDRAW MODAL -->
     <div id="withdrawModal" class="modal">
         <div class="modal-content">
             <h3>WITHDRAW</h3>
@@ -461,7 +453,6 @@
         </div>
     </div>
 
-    <!-- PROFILE MODAL -->
     <div id="profileModal" class="modal">
         <div class="modal-content">
             <h3 style="margin-top:0;">ACCOUNT PROFILE</h3>
@@ -722,10 +713,12 @@
                 }
             });
 
-            let totalPool = selectedBoards.length * stakePerBoard;
-            let derashAmount = totalPool * 2; // የሽልማት መጠን
+            // 1 ተጫዋች ሲገባ ደራሹ በትክክል ከገባው የካርቴላ/ተጫዋች ብዛት ጋር እንዲመጣጠን ተስተካክሏል
+            let totalPlayers = selectedBoards.length; 
+            let derashAmount = totalPlayers * stakePerBoard; 
+
             document.getElementById('derash-box').innerHTML = `<span>Derash</span>${derashAmount}`;
-            document.getElementById('players-box').innerHTML = `<span>Players</span>${selectedBoards.length}`;
+            document.getElementById('players-box').innerHTML = `<span>Players</span>${totalPlayers}`;
 
             startCallingNumbers(derashAmount, totalCost);
         }
