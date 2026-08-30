@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bankeruto Bingo</title>
+    <title>Dila Bingo</title>
     <style>
         body {
             background-color: #2b0c1e;
@@ -313,9 +313,10 @@
 </head>
 <body>
 
+    <!-- SCREEN 1: BINGO SELECTION -->
     <div id="selection-screen">
         <div class="header-top">
-            <div class="title">Bankeruto Bingo</div>
+            <div class="title">Dila Bingo</div>
             <div class="stats-box">
                 <div class="stat-card" onclick="openModal('walletModal')"><span>Wallet</span><span id="walletDisp">0</span></div>
                 <div class="stat-card"><span>Stake</span>10</div>
@@ -335,6 +336,7 @@
         <div class="grid-container" id="boardsGrid"></div>
     </div>
 
+    <!-- SCREEN 2: ACTIVE GAME -->
     <div id="game-screen" class="game-screen">
         <div class="top-stats">
             <div class="stat-box"><span>Game ID</span>MBR9</div>
@@ -375,6 +377,7 @@
         </div>
     </div>
 
+    <!-- BINGO WIN MODAL -->
     <div id="bingoModal" class="modal">
         <div class="modal-content">
             <div class="bingo-alert-text">🎉 BINGO! 🎉</div>
@@ -383,6 +386,7 @@
         </div>
     </div>
 
+    <!-- BOTTOM NAVIGATION -->
     <div class="bottom-nav">
         <div class="nav-item active" onclick="switchTab('bingo')">🏠<br>BINGO</div>
         <div class="nav-item" onclick="openModal('historyModal')">🕒<br>HISTORY</div>
@@ -390,6 +394,7 @@
         <div class="nav-item" onclick="openModal('profileModal')">👤<br>PROFILE</div>
     </div>
 
+    <!-- HISTORY MODAL -->
     <div id="historyModal" class="modal">
         <div class="modal-content" style="max-width: 300px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
@@ -403,6 +408,7 @@
         </div>
     </div>
 
+    <!-- WALLET MODAL -->
     <div id="walletModal" class="modal">
         <div class="modal-content">
             <h3 style="margin-top:0;">WALLET</h3>
@@ -415,6 +421,7 @@
             <button class="close-btn" onclick="openDepositModal()" style="background:#f39c12; margin-bottom: 5px; width: 100%;">ብር ጫን (Deposit via Telebirr)</button>
             <button class="close-btn" onclick="openWithdrawModal()" style="background:#2980b9; margin-bottom: 5px; width: 100%;">ငွေ አውጣ (Withdraw)</button>
             
+            <!-- ADMIN CONTROLS -->
             <div style="margin-top: 15px; border-top: 1px dashed #ffd700; padding-top: 8px;">
                 <div style="font-size: 10px; color: #ffd700; margin-bottom: 4px;">⚙️ Admin Panel (ብር ለመሙላት)</div>
                 <input type="number" id="adminAddAmt" placeholder="የብር መጠን" style="width: 80%; padding: 4px; font-size: 11px; border-radius: 4px; border: none; text-align: center;">
@@ -425,6 +432,7 @@
         </div>
     </div>
 
+    <!-- DEPOSIT MODAL -->
     <div id="depositModal" class="modal">
         <div class="modal-content">
             <h3>DEPOSIT REQUEST</h3>
@@ -436,6 +444,7 @@
         </div>
     </div>
 
+    <!-- WITHDRAW MODAL -->
     <div id="withdrawModal" class="modal">
         <div class="modal-content">
             <h3>WITHDRAW REQUEST</h3>
@@ -447,10 +456,11 @@
         </div>
     </div>
 
+    <!-- PROFILE MODAL -->
     <div id="profileModal" class="modal">
         <div class="modal-content">
             <h3 style="margin-top:0;">ACCOUNT PROFILE</h3>
-            <p style="font-size: 12px; color: #ffd700;">@Wiz (ተጠቃሚ)</p>
+            <p style="font-size: 12px; color: #ffd700;">@DilaPlayer (ተጠቃሚ)</p>
             <div style="text-align: left; font-size: 11px; background: #350924; padding: 8px; border-radius: 5px; margin: 10px 0; line-height: 1.6;">
                 <div>Total Withdrawal: <span id="totalWithdrawStat">0</span> ETB</div>
                 <div>Games Won: <span id="gamesWonStat">0</span></div>
@@ -460,7 +470,15 @@
     </div>
 
     <script>
-        let userWallet = parseInt(localStorage.getItem('dila_wallet')) || 0;
+        // አዲስ ተጠቃሚ ሲመዘገብ (Localstorage ከሌለ) 10 ብር ቦነስ በራስ ሰር ይገባል
+        let userWallet;
+        if (localStorage.getItem('dila_wallet') === null) {
+            userWallet = 10; // አዲስ ተጠቃሚ የ 10 ብር ቦነስ
+            localStorage.setItem('dila_wallet', userWallet);
+        } else {
+            userWallet = parseInt(localStorage.getItem('dila_wallet')) || 0;
+        }
+
         let totalWithdrawal = parseInt(localStorage.getItem('dila_withdrawal')) || 0;
         let gamesWonCount = parseInt(localStorage.getItem('dila_wins')) || 0;
         let gameHistory = JSON.parse(localStorage.getItem('dila_history')) || [];
@@ -560,7 +578,6 @@
                 }
                 countText.innerText = `Boards: ${selectedBoards.length}/2`;
                 
-                // የተጫዋቾች ብዛት በእጅ የተያዙት የቦርድ ብዛት (ካርቴላዎች) ይሆናል
                 let activePlayersCount = selectedBoards.length > 0 ? selectedBoards.length : 1;
                 let rawPool = activePlayersCount * stakePerBoard; 
                 let finalPool = rawPool * 0.8;
@@ -600,10 +617,9 @@
             saveWalletData();
             gameStarted = true;
             
-            // የተጫዋቾች ብዛት በትክክል በተጫዋቹ የተያዙ ቦርዶች/ካርቴላዎች ብዛት ይወሰናል
             let activePlayersCount = selectedBoards.length;
             let rawPool = activePlayersCount * stakePerBoard;
-            let derashAmount = rawPool * 0.8; // 20% ለአስተዳዳሪው ተቀንሶ ለአሸናፊው የሚቀረው
+            let derashAmount = rawPool * 0.8;
 
             document.getElementById('selection-screen').style.display = 'none';
             document.getElementById('game-screen').style.display = 'block';
