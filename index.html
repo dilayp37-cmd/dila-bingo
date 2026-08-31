@@ -325,14 +325,13 @@
 
         <div class="action-bar">
             <div class="timer-box" id="timer-display">
-                <span id="countdown-text">ተጫዋቾችን በመጠበቅ ላይ... (30)</span>
+                <span id="countdown-text">እባክዎ ቢያንስ 1 ካርቴላ ይምረጡ...</span>
             </div>
         </div>
 
         <div class="boards-info">
             <span id="boardsCountText">Boards: 0/2</span>
-            <!-- ደራሹ በሎቢው ስክሪን ላይ ሙሉ በሙሉ ተደብቋል -->
-            <span style="color: #ffd700;">ዙሩ ሲጀመር ይታያል</span>
+            <span style="color: #ffd700;">ካርቴላ ይምረጡ</span>
         </div>
         <div class="grid-container" id="boardsGrid"></div>
     </div>
@@ -603,7 +602,7 @@
                     total += boards.length;
                 }
             }
-            return Math.max(1, total);
+            return Math.max(0, total);
         }
 
         const countdownTextEl = document.getElementById("countdown-text");
@@ -619,25 +618,26 @@
                 return;
             }
 
-            let totalPlayers = getTotalActivePlayersCount();
-            
-            if (totalPlayers < 2) {
+            // ማስተካከያ፡ ተጫዋቹ ቢያንስ 1 ካርቴላ መምረጥ አለበት ካልመረጠ ቆጣሪው አይጀምርም!
+            if (selectedBoards.length === 0) {
                 localStorage.removeItem('dila_shared_timer');
-                countdownTextEl.innerText = `ተጫዋቾችን በመጠበቅ ላይ... (ሌሎች ተጫዋቾች ይግቡ)`;
+                countdownTextEl.innerText = `እባክዎ መጫወት ለመጀመር ቢያንስ 1 ካርቴላ ይምረጡ...`;
                 return;
             }
 
+            let totalPlayers = getTotalActivePlayersCount();
             let sharedTimer = localStorage.getItem('dila_shared_timer');
             let targetTime;
+            
             if (!sharedTimer || now > parseInt(sharedTimer)) {
-                targetTime = now + 30000;
+                targetTime = now + 30000; // 30 ሰከንድ
                 localStorage.setItem('dila_shared_timer', targetTime);
             } else {
                 targetTime = parseInt(sharedTimer);
             }
 
             let timeLeft = Math.max(0, Math.floor((targetTime - now) / 1000));
-            countdownTextEl.innerText = `ጨዋታው በ ${timeLeft} ሰከንድ ውስጥ ይጀምራል... (ተጫዋቾች: ${totalPlayers})`;
+            countdownTextEl.innerText = `ጨዋታው በ ${timeLeft} ሰከንድ ውስጥ ይጀምራል... (አጠቃላይ ቦርዶች: ${totalPlayers})`;
 
             if (timeLeft <= 0 && !gameSession.started) {
                 triggerGlobalGameStart();
@@ -645,15 +645,18 @@
         }, 1000);
 
         function triggerGlobalGameStart() {
+            if (selectedBoards.length === 0) {
+                return; // ካርቴላ ከሌለ ጨዋታውን አይጀምርም
+            }
+
             let totalCost = selectedBoards.length * stakePerBoard;
-            if (selectedBoards.length > 0) {
-                if (userWallet < totalCost) {
-                    alert("በቦርሳዎ ውስጥ በቂ ብር የለም! ቦርሶቹ ተሰርዘዋል።");
-                    selectedBoards = [];
-                } else {
-                    userWallet -= totalCost;
-                    saveWalletData();
-                }
+            if (userWallet < totalCost) {
+                alert("በቦርሳዎ ውስጥ በቂ ብር የለም! ቦርሶቹ ተሰርዘዋል።");
+                selectedBoards = [];
+                return;
+            } else {
+                userWallet -= totalCost;
+                saveWalletData();
             }
 
             let sessionData = {
@@ -672,10 +675,6 @@
 
             const container = document.getElementById('selectedCartelasContainer');
             container.innerHTML = '';
-
-            if (selectedBoards.length === 0) {
-                container.innerHTML = `<div style="text-align:center; padding:15px; font-size:12px; color:#ffd700;"> በዚህ ዙር ቦርድ አልመረጡም (ተመልካች ነዎት)።</div>`;
-            }
 
             selectedBoards.forEach(bId => {
                 let box = document.createElement('div');
