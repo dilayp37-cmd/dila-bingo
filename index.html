@@ -325,7 +325,7 @@
 
         <div class="action-bar">
             <div class="timer-box" id="timer-display">
-                ጨዋታው በ <span id="countdown">40</span> ሰከንድ ውስጥ ይጀምራል...
+                የክፍለ ጊዜ ጨዋታ በ <span id="countdown">30</span> ሰከንድ ውስጥ ይጀምራል...
             </div>
         </div>
 
@@ -339,7 +339,7 @@
     <!-- SCREEN 2: ACTIVE GAME -->
     <div id="game-screen" class="game-screen">
         <div class="top-stats">
-            <div class="stat-box"><span>Game ID</span>MBR9</div>
+            <div class="stat-box"><span>Game ID</span>DIL9</div>
             <div class="stat-box" id="derash-box"><span>Derash</span>0</div>
             <div class="stat-box" id="players-box"><span>Players</span>1</div>
             <div class="stat-box"><span>Bet</span>10</div>
@@ -382,7 +382,7 @@
         <div class="modal-content">
             <div class="bingo-alert-text">🎉 BINGO! 🎉</div>
             <p style="font-size: 13px; margin: 10px 0;" id="bingoMessage">አሸናፊ ተገኝቷል!</p>
-            <button class="close-btn" onclick="location.reload()">አዲስ ጨዋታ</button>
+            <button class="close-btn" onclick="resetToLobby()">አዲስ ጨዋታ</button>
         </div>
     </div>
 
@@ -470,13 +470,15 @@
     </div>
 
     <script>
-        // አዲስ ተጠቃሚ ሲመዘገብ (Localstorage ከሌለ) 10 ብር ቦነስ በራስ ሰር ይገባል
+        // ዋሌት እና የቦነስ አሰራር (አዲስ ስልክ ሲከፈት በራስ ሰር 10 ብር ቦነስ ይሰጣል)
         let userWallet;
-        if (localStorage.getItem('dila_wallet') === null) {
-            userWallet = 10; // አዲስ ተጠቃሚ የ 10 ብር ቦነስ
+        let savedWallet = localStorage.getItem('dila_wallet');
+        
+        if (savedWallet === null || savedWallet === "0" || isNaN(parseInt(savedWallet))) {
+            userWallet = 10; 
             localStorage.setItem('dila_wallet', userWallet);
         } else {
-            userWallet = parseInt(localStorage.getItem('dila_wallet')) || 0;
+            userWallet = parseInt(savedWallet);
         }
 
         let totalWithdrawal = parseInt(localStorage.getItem('dila_withdrawal')) || 0;
@@ -486,9 +488,6 @@
         let soundEnabled = true;
         let selectedBoards = [];
         let allCartelas = {}; 
-        let calledNumbers = [];
-        let gameStarted = false;
-        let gameOver = false;
 
         updateWalletUI();
         renderHistory();
@@ -501,7 +500,7 @@
             const amharicNumbers = {
                 1: "አንድ", 2: "ሁለት", 3: "ሶስት", 4: "አራት", 5: "አምስት", 6: "ስድስት", 7: "ሰባት", 8: "ስምንት", 9: "ዘጠኝ", 10: "አስር",
                 11: "አስራ አንድ", 12: "አስራ ሁለት", 13: "አስራ ሶስት", 14: "አስራ አራት", 15: "አስራ አምስት", 16: "አስራ ስድስት", 17: "አስራ ሰባት", 18: "አስራ ስምንት", 19: "አስራ ዘጠኝ", 20: "ሃያ",
-                30: "ሰላሳ", 32: "ሰላሳ ሁለት", 40: "አርባ", 50: "ኃምሳ", 60: "ስድሳ", 70: "ሰባ", 75: "ሰባ አምስት"
+                30: "ሰላሳ", 40: "አርባ", 50: "ኃምሳ", 60: "ስድሳ", 70: "ሰባ", 75: "ሰባ አምስት"
             };
             if (amharicNumbers[num]) return amharicNumbers[num];
             let tens = Math.floor(num / 10) * 10;
@@ -564,7 +563,11 @@
             btn.innerText = i;
             
             btn.onclick = () => {
-                if (gameStarted) return;
+                let activeGameSession = JSON.parse(localStorage.getItem('dila_active_game'));
+                if (activeGameSession && activeGameSession.started) {
+                    alert("ጨዋታው ተጀምሯል! እባክዎ ቀጣዩን ዙር ይጠብቁ።");
+                    return;
+                }
                 if (selectedBoards.includes(i)) {
                     selectedBoards = selectedBoards.filter(item => item !== i);
                     btn.classList.remove('selected');
@@ -586,46 +589,73 @@
             grid.appendChild(btn);
         }
 
-        let timeLeft = 40;
+        // --- SHARED TIMER LOGIC (በሁሉም ስልኮች በአንድ ሰዓት እንዲጀምር የሚደረግ አሰራር) ---
         const countdownEl = document.getElementById("countdown");
-        const timerInterval = setInterval(() => {
-            if (gameStarted) return;
-            timeLeft--;
-            if (countdownEl) countdownEl.innerText = timeLeft;
-            
-            if (timeLeft <= 0) {
-                if (selectedBoards.length > 0) {
-                    startAutomaticGame();
-                } else {
-                    timeLeft = 40;
+        
+        setInterval(() => {
+            let now = Date.now();
+            let sharedTimer = localStorage.getItem('dila_shared_timer');
+            let gameSession = JSON.parse(localStorage.getItem('dila_active_game')) || { started: false };
+
+            if (gameSession.started) {
+                // ጨዋታው ከተጀመረ ወደ ጨዋታ ስክሪን ውሰድ
+                if (document.getElementById('selection-screen').style.display !== 'none') {
+                    startAutomaticGame(gameSession);
                 }
-            }
-        }, 1000);
-
-        function startAutomaticGame() {
-            if (gameStarted) return;
-            let totalCost = selectedBoards.length * stakePerBoard;
-
-            if (userWallet < totalCost) {
-                alert("በቦርሳዎ ውስጥ በቂ ብር የለም! እባክዎ በቴሌብር የብር ጥያቄ ይላኩ።");
-                openModal('walletModal');
-                timeLeft = 40;
                 return;
             }
 
-            userWallet -= totalCost;
-            saveWalletData();
-            gameStarted = true;
-            
-            let activePlayersCount = selectedBoards.length;
-            let rawPool = activePlayersCount * stakePerBoard;
-            let derashAmount = rawPool * 0.8;
+            let targetTime;
+            if (!sharedTimer || now > parseInt(sharedTimer)) {
+                // የ 30 ሰከንድ የቆጣሪ ክፍለ ጊዜ መፍጠር
+                targetTime = now + 30000;
+                localStorage.setItem('dila_shared_timer', targetTime);
+            } else {
+                targetTime = parseInt(sharedTimer);
+            }
 
+            let timeLeft = Math.max(0, Math.floor((targetTime - now) / 1000));
+            if (countdownEl) countdownEl.innerText = timeLeft;
+
+            if (timeLeft <= 0 && !gameSession.started) {
+                // ሰዓቱ ሲያልቅ ጨዋታውን በሁሉም ስልኮች በአንድ ጊዜ አስጀምር
+                triggerGlobalGameStart();
+            }
+        }, 1000);
+
+        function triggerGlobalGameStart() {
+            let totalCost = selectedBoards.length * stakePerBoard;
+            if (selectedBoards.length > 0) {
+                if (userWallet < totalCost) {
+                    alert("በቦርሳዎ ውስጥ በቂ ብር የለም! ቦርሶቹ ተሰርዘዋል።");
+                    selectedBoards = [];
+                } else {
+                    userWallet -= totalCost;
+                    saveWalletData();
+                }
+            }
+
+            let sessionData = {
+                started: true,
+                calledNumbers: [],
+                startTime: Date.now()
+            };
+            localStorage.setItem('dila_active_game', JSON.stringify(sessionData));
+            startAutomaticGame(sessionData);
+        }
+
+        let globalCallInterval = null;
+
+        function startAutomaticGame(session) {
             document.getElementById('selection-screen').style.display = 'none';
             document.getElementById('game-screen').style.display = 'block';
 
             const container = document.getElementById('selectedCartelasContainer');
             container.innerHTML = '';
+
+            if (selectedBoards.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding:15px; font-size:12px; color:#ffd700;"> በዚህ ዙር ቦርድ አልመረጡም (ተመልካች ነዎት)።</div>`;
+            }
 
             selectedBoards.forEach(bId => {
                 let box = document.createElement('div');
@@ -656,10 +686,110 @@
                 }
             });
 
+            let rawPool = (selectedBoards.length > 0 ? selectedBoards.length : 1) * stakePerBoard;
+            let derashAmount = rawPool * 0.8;
             document.getElementById('derash-box').innerHTML = `<span>Derash</span>${derashAmount}`;
-            document.getElementById('players-box').innerHTML = `<span>Players</span>${activePlayersCount}`;
+            document.getElementById('players-box').innerHTML = `<span>Players</span>${selectedBoards.length > 0 ? selectedBoards.length : 1}`;
 
-            startCallingNumbers(derashAmount);
+            runCallerEngine(derashAmount);
+        }
+
+        function runCallerEngine(derashAmount) {
+            if (globalCallInterval) clearInterval(globalCallInterval);
+
+            let callBox = document.getElementById('call-box');
+            let currentNumDisp = document.getElementById('currentNumDisp');
+            let recentBalls = document.querySelectorAll('.recent-ball');
+            let recentQueue = [];
+            let localCalled = [];
+
+            globalCallInterval = setInterval(() => {
+                let gameSession = JSON.parse(localStorage.getItem('dila_active_game'));
+                if (!gameSession || !gameSession.started) return;
+
+                // በየ 3 ሰከንዱ በጋራ ከ 1 እስከ 75 ቁጥሮችን መጥራት
+                let elapsedSeconds = Math.floor((Date.now() - gameSession.startTime) / 2500);
+                if (elapsedSeconds > 75) {
+                    clearInterval(globalCallInterval);
+                    return;
+                }
+
+                // ቁጥሮችን በቅደም ተከተል በዘፈቀደ ማመንጨት (Pseudo-random synchronized across phones)
+                let allNums = Array.from({length: 75}, (_, i) => i + 1);
+                // Simple shuffle based on a fixed seed per game session
+                let seed = 12345;
+                for (let i = allNums.length - 1; i > 0; i--) {
+                    seed = (seed * 9301 + 49297) % 233280;
+                    let j = Math.floor((seed / 233280) * (i + 1));
+                    [allNums[i], allNums[j]] = [allNums[j], allNums[i]];
+                }
+
+                if (elapsedSeconds < allNums.length) {
+                    let currentNum = allNums[elapsedSeconds];
+                    if (!localCalled.includes(currentNum)) {
+                        localCalled.push(currentNum);
+                        
+                        currentNumDisp.innerText = currentNum;
+                        callBox.innerHTML = `<span>Call</span>${localCalled.length}`;
+
+                        recentQueue.unshift(currentNum);
+                        if(recentQueue.length > 3) recentQueue.pop();
+                        recentBalls.forEach((ball, idx) => {
+                            ball.innerText = recentQueue[idx] !== undefined ? recentQueue[idx] : '--';
+                        });
+
+                        if (cells[currentNum]) {
+                            cells[currentNum].element.classList.add('active');
+                            speakNumber(cells[currentNum].letter, currentNum);
+
+                            selectedBoards.forEach(bId => {
+                                let cellEl = document.getElementById(`cell-${bId}-${currentNum}`);
+                                if(cellEl) cellEl.classList.add('marked');
+                            });
+                        }
+
+                        // ቢንጎ ማረጋገጥ
+                        selectedBoards.forEach(bId => {
+                            if(checkBingo(bId, localCalled)) {
+                                clearInterval(globalCallInterval);
+
+                                userWallet += derashAmount;
+                                gamesWonCount++;
+                                saveWalletData();
+
+                                let historyText = `Game WIN | Boards: #${bId} | Prize: +${derashAmount} ETB`;
+                                gameHistory.unshift(historyText);
+                                localStorage.setItem('dila_history', JSON.stringify(gameHistory));
+                                renderHistory();
+
+                                document.getElementById('bingoMessage').innerText = `አሸናፊ ቦርድ #${bId}! ${derashAmount} ብር ወደ ዋሌትዎ ገብቷል!`;
+                                document.getElementById('bingoModal').style.display = 'flex';
+                            }
+                        });
+                    }
+                }
+            }, 1000);
+        }
+
+        function checkBingo(boardId, calledList) {
+            let matrix = allCartelas[boardId];
+            let isMarked = (val) => val === 'FREE' || calledList.includes(val);
+
+            for(let r=0; r<5; r++) {
+                if(isMarked(matrix[r][0]) && isMarked(matrix[r][1]) && isMarked(matrix[r][2]) && isMarked(matrix[r][3]) && isMarked(matrix[r][4])) return true;
+            }
+            for(let c=0; c<5; c++) {
+                if(isMarked(matrix[0][c]) && isMarked(matrix[1][c]) && isMarked(matrix[2][c]) && isMarked(matrix[3][c]) && isMarked(matrix[4][c])) return true;
+            }
+            if(isMarked(matrix[0][0]) && isMarked(matrix[1][1]) && isMarked(matrix[2][2]) && isMarked(matrix[3][3]) && isMarked(matrix[4][4])) return true;
+            if(isMarked(matrix[0][4]) && isMarked(matrix[1][3]) && isMarked(matrix[2][2]) && isMarked(matrix[3][1]) && isMarked(matrix[4][0])) return true;
+            return false;
+        }
+
+        function resetToLobby() {
+            localStorage.removeItem('dila_active_game');
+            localStorage.removeItem('dila_shared_timer');
+            location.reload();
         }
 
         function updateWalletUI() {
@@ -684,7 +814,7 @@
             }
             userWallet += amt;
             saveWalletData();
-            alert(`ለተጠቃሚው የ ${amt} ብር ቴሌብር ክፍያ ተረጋግጦ ተጭኗል!`);
+            alert(`ለተጠቃሚው የ ${amt} ብር ክፍያ ተረጋግጦ ተጭኗል!`);
             document.getElementById('adminAddAmt').value = '';
             closeModal('walletModal');
         }
@@ -698,10 +828,10 @@
             let amount = document.getElementById('depositAmountInput').value;
             let refId = document.getElementById('depositRefInput').value;
             if (!amount || amount <= 0 || !refId) {
-                alert("እባክዎ የብር መጠኑን እና የግብይት ቁጥር (Transaction ID) በትክክል ይሙሉ!");
+                alert("እባክዎ የብር መጠኑን እና የግብይት ቁጥር ይሙሉ!");
                 return;
             }
-            alert(`የ ${amount} ብር የዲፖዚት ማሳወቂያዎ (Ref: ${refId}) ወደ አስተዳዳሪው ተልኳል። አስተዳዳሪው የቴሌብር መልእክቱን አረጋግጦ ዋሌትዎን ይሞላልዎታል።`);
+            alert(`የ ${amount} ብር የዲፖዚት ማሳወቂያዎ (Ref: ${refId}) ወደ አስተዳዳሪው ተልኳል።`);
             closeModal('depositModal');
             openModal('walletModal');
         }
@@ -725,7 +855,7 @@
             userWallet -= amount;
             totalWithdrawal += amount;
             saveWalletData();
-            alert(`የ ${amount} ብር የዊዝድሮ ጥያቄ ወደ ስልክ ቁጥር ${phone} ተልኳል! ገንዘቡ በቅርብ ይላክልዎታል።`);
+            alert(`የ ${amount} ብር የዊዝድሮ ጥያቄ ወደ ስልክ ቁጥር ${phone} ተልኳል!`);
             closeModal('withdrawModal');
             openModal('walletModal');
         }
@@ -743,81 +873,6 @@
             callerTable.appendChild(tr);
         }
 
-        function checkBingo(boardId) {
-            let matrix = allCartelas[boardId];
-            let isMarked = (val) => val === 'FREE' || calledNumbers.includes(val);
-
-            for(let r=0; r<5; r++) {
-                if(isMarked(matrix[r][0]) && isMarked(matrix[r][1]) && isMarked(matrix[r][2]) && isMarked(matrix[r][3]) && isMarked(matrix[r][4])) return true;
-            }
-            for(let c=0; c<5; c++) {
-                if(isMarked(matrix[0][c]) && isMarked(matrix[1][c]) && isMarked(matrix[2][c]) && isMarked(matrix[3][c]) && isMarked(matrix[4][c])) return true;
-            }
-            if(isMarked(matrix[0][0]) && isMarked(matrix[1][1]) && isMarked(matrix[2][2]) && isMarked(matrix[3][3]) && isMarked(matrix[4][4])) return true;
-            if(isMarked(matrix[0][4]) && isMarked(matrix[1][3]) && isMarked(matrix[2][2]) && isMarked(matrix[3][1]) && isMarked(matrix[4][0])) return true;
-            return false;
-        }
-
-        function startCallingNumbers(derashAmount) {
-            let recentQueue = [];
-            let callBox = document.getElementById('call-box');
-            let currentNumDisp = document.getElementById('currentNumDisp');
-            let recentBalls = document.querySelectorAll('.recent-ball');
-
-            let callInterval = setInterval(() => {
-                if (gameOver || calledNumbers.length >= 75) {
-                    clearInterval(callInterval);
-                    return;
-                }
-
-                let randomNum;
-                do {
-                    randomNum = Math.floor(Math.random() * 75) + 1;
-                } while (calledNumbers.includes(randomNum));
-
-                calledNumbers.push(randomNum);
-                currentNumDisp.innerText = randomNum;
-                callBox.innerHTML = `<span>Call</span>${calledNumbers.length}`;
-
-                recentQueue.unshift(randomNum);
-                if(recentQueue.length > 3) recentQueue.pop();
-                recentBalls.forEach((ball, idx) => {
-                    ball.innerText = recentQueue[idx] !== undefined ? recentQueue[idx] : '--';
-                });
-
-                if (cells[randomNum]) {
-                    cells[randomNum].element.classList.add('active');
-                    speakNumber(cells[randomNum].letter, randomNum);
-
-                    selectedBoards.forEach(bId => {
-                        let cellEl = document.getElementById(`cell-${bId}-${randomNum}`);
-                        if(cellEl) cellEl.classList.add('marked');
-                    });
-                }
-
-                for(let i=0; i<selectedBoards.length; i++) {
-                    let bId = selectedBoards[i];
-                    if(checkBingo(bId)) {
-                        gameOver = true;
-                        clearInterval(callInterval);
-
-                        userWallet += derashAmount;
-                        gamesWonCount++;
-                        saveWalletData();
-
-                        let historyText = `Game WIN | Boards: #${bId} | Prize: +${derashAmount} ETB`;
-                        gameHistory.unshift(historyText);
-                        localStorage.setItem('dila_history', JSON.stringify(gameHistory));
-                        renderHistory();
-
-                        document.getElementById('bingoMessage').innerText = `አሸናፊ ቦርድ #${bId}! ${derashAmount} ብር (20% ተቀንሶ) ወደ ዋሌትዎ ገብቷል!`;
-                        document.getElementById('bingoModal').style.display = 'flex';
-                        break;
-                    }
-                }
-            }, 2500);
-        }
-
         function renderHistory() {
             const listEl = document.getElementById('historyList');
             if (gameHistory.length > 0) {
@@ -829,7 +884,13 @@
 
         function openModal(modalId) { document.getElementById(modalId).style.display = 'flex'; }
         function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
-        function switchTab(tab) { if(tab === 'bingo' && !gameStarted) { document.getElementById('selection-screen').style.display = 'block'; document.getElementById('game-screen').style.display = 'none'; } }
+        function switchTab(tab) { 
+            let activeGameSession = JSON.parse(localStorage.getItem('dila_active_game'));
+            if(tab === 'bingo' && (!activeGameSession || !activeGameSession.started)) { 
+                document.getElementById('selection-screen').style.display = 'block'; 
+                document.getElementById('game-screen').style.display = 'none'; 
+            } 
+        }
     </script>
 </body>
 </html>
