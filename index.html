@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dila Bingo</title>
+    <title>Dila Bingo - ኢትዮጵያ</title>
     <style>
         body {
             background-color: #2b0c1e;
@@ -24,7 +24,7 @@
         }
         .title {
             color: #ffd700;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: bold;
         }
         .stats-box {
@@ -316,7 +316,7 @@
     <!-- SCREEN 1: BINGO SELECTION -->
     <div id="selection-screen">
         <div class="header-top">
-            <div class="title">Dila Bingo</div>
+            <div class="title">🇪🇹 Dila Bingo (ኢትዮጵያ)</div>
             <div class="stats-box">
                 <div class="stat-card" onclick="openModal('walletModal')"><span>Wallet</span><span id="walletDisp">0</span></div>
                 <div class="stat-card"><span>Stake</span>10</div>
@@ -325,13 +325,14 @@
 
         <div class="action-bar">
             <div class="timer-box" id="timer-display">
-                የክፍለ ጊዜ ጨዋታ በ <span id="countdown">30</span> ሰከንድ ውስጥ ይጀምራል...
+                <span id="countdown-text">ተጫዋቾችን በመጠበቅ ላይ... (30)</span>
             </div>
         </div>
 
         <div class="boards-info">
             <span id="boardsCountText">Boards: 0/2</span>
-            <span style="color: #ffd700;" id="potentialDerash">ደራሽ: 0 ብር</span>
+            <!-- ደራሹ በሎቢው ስክሪን ላይ ሙሉ በሙሉ ተደብቋል -->
+            <span style="color: #ffd700;">ዙሩ ሲጀመር ይታያል</span>
         </div>
         <div class="grid-container" id="boardsGrid"></div>
     </div>
@@ -380,7 +381,7 @@
     <!-- BINGO WIN MODAL -->
     <div id="bingoModal" class="modal">
         <div class="modal-content">
-            <div class="bingo-alert-text">🎉 BINGO! 🎉</div>
+            <div class="bingo-alert-text">🇪🇹 🎉 BINGO! 🎉 🇪🇹</div>
             <p style="font-size: 13px; margin: 10px 0;" id="bingoMessage">አሸናፊ ተገኝቷል!</p>
             <button class="close-btn" onclick="resetToLobby()">አዲስ ጨዋታ</button>
         </div>
@@ -470,7 +471,6 @@
     </div>
 
     <script>
-        // ዋሌት እና የቦነስ አሰራር (አዲስ ስልክ ሲከፈት በራስ ሰር 10 ብር ቦነስ ይሰጣል)
         let userWallet;
         let savedWallet = localStorage.getItem('dila_wallet');
         
@@ -554,7 +554,6 @@
 
         const grid = document.getElementById('boardsGrid');
         const countText = document.getElementById('boardsCountText');
-        const derashText = document.getElementById('potentialDerash');
 
         for (let i = 1; i <= 90; i++) {
             allCartelas[i] = generateCartelaNumbers(i);
@@ -581,33 +580,56 @@
                 }
                 countText.innerText = `Boards: ${selectedBoards.length}/2`;
                 
-                let activePlayersCount = selectedBoards.length > 0 ? selectedBoards.length : 1;
-                let rawPool = activePlayersCount * stakePerBoard; 
-                let finalPool = rawPool * 0.8;
-                derashText.innerText = `ደራሽ: ${finalPool} ብር`;
+                localStorage.setItem('dila_my_boards_' + getDeviceSessionId(), JSON.stringify(selectedBoards));
             };
             grid.appendChild(btn);
         }
 
-        // --- SHARED TIMER LOGIC (በሁሉም ስልኮች በአንድ ሰዓት እንዲጀምር የሚደረግ አሰራር) ---
-        const countdownEl = document.getElementById("countdown");
+        function getDeviceSessionId() {
+            let sId = localStorage.getItem('dila_device_id');
+            if (!sId) {
+                sId = 'dev_' + Math.random().toString(36).substring(2, 9);
+                localStorage.setItem('dila_device_id', sId);
+            }
+            return sId;
+        }
+
+        function getTotalActivePlayersCount() {
+            let total = selectedBoards.length;
+            for (let i = 0; i < localStorage.length; i++) {
+                let key = localStorage.key(i);
+                if (key && key.startsWith('dila_my_boards_') && key !== 'dila_my_boards_' + getDeviceSessionId()) {
+                    let boards = JSON.parse(localStorage.getItem(key)) || [];
+                    total += boards.length;
+                }
+            }
+            return Math.max(1, total);
+        }
+
+        const countdownTextEl = document.getElementById("countdown-text");
         
         setInterval(() => {
             let now = Date.now();
-            let sharedTimer = localStorage.getItem('dila_shared_timer');
             let gameSession = JSON.parse(localStorage.getItem('dila_active_game')) || { started: false };
 
             if (gameSession.started) {
-                // ጨዋታው ከተጀመረ ወደ ጨዋታ ስክሪን ውሰድ
                 if (document.getElementById('selection-screen').style.display !== 'none') {
                     startAutomaticGame(gameSession);
                 }
                 return;
             }
 
+            let totalPlayers = getTotalActivePlayersCount();
+            
+            if (totalPlayers < 2) {
+                localStorage.removeItem('dila_shared_timer');
+                countdownTextEl.innerText = `ተጫዋቾችን በመጠበቅ ላይ... (ሌሎች ተጫዋቾች ይግቡ)`;
+                return;
+            }
+
+            let sharedTimer = localStorage.getItem('dila_shared_timer');
             let targetTime;
             if (!sharedTimer || now > parseInt(sharedTimer)) {
-                // የ 30 ሰከንድ የቆጣሪ ክፍለ ጊዜ መፍጠር
                 targetTime = now + 30000;
                 localStorage.setItem('dila_shared_timer', targetTime);
             } else {
@@ -615,10 +637,9 @@
             }
 
             let timeLeft = Math.max(0, Math.floor((targetTime - now) / 1000));
-            if (countdownEl) countdownEl.innerText = timeLeft;
+            countdownTextEl.innerText = `ጨዋታው በ ${timeLeft} ሰከንድ ውስጥ ይጀምራል... (ተጫዋቾች: ${totalPlayers})`;
 
             if (timeLeft <= 0 && !gameSession.started) {
-                // ሰዓቱ ሲያልቅ ጨዋታውን በሁሉም ስልኮች በአንድ ጊዜ አስጀምር
                 triggerGlobalGameStart();
             }
         }, 1000);
@@ -637,7 +658,6 @@
 
             let sessionData = {
                 started: true,
-                calledNumbers: [],
                 startTime: Date.now()
             };
             localStorage.setItem('dila_active_game', JSON.stringify(sessionData));
@@ -686,10 +706,11 @@
                 }
             });
 
-            let rawPool = (selectedBoards.length > 0 ? selectedBoards.length : 1) * stakePerBoard;
+            let totalActivePlayers = getTotalActivePlayersCount();
+            let rawPool = totalActivePlayers * stakePerBoard;
             let derashAmount = rawPool * 0.8;
             document.getElementById('derash-box').innerHTML = `<span>Derash</span>${derashAmount}`;
-            document.getElementById('players-box').innerHTML = `<span>Players</span>${selectedBoards.length > 0 ? selectedBoards.length : 1}`;
+            document.getElementById('players-box').innerHTML = `<span>Players</span>${totalActivePlayers}`;
 
             runCallerEngine(derashAmount);
         }
@@ -707,16 +728,13 @@
                 let gameSession = JSON.parse(localStorage.getItem('dila_active_game'));
                 if (!gameSession || !gameSession.started) return;
 
-                // በየ 3 ሰከንዱ በጋራ ከ 1 እስከ 75 ቁጥሮችን መጥራት
                 let elapsedSeconds = Math.floor((Date.now() - gameSession.startTime) / 2500);
                 if (elapsedSeconds > 75) {
                     clearInterval(globalCallInterval);
                     return;
                 }
 
-                // ቁጥሮችን በቅደም ተከተል በዘፈቀደ ማመንጨት (Pseudo-random synchronized across phones)
                 let allNums = Array.from({length: 75}, (_, i) => i + 1);
-                // Simple shuffle based on a fixed seed per game session
                 let seed = 12345;
                 for (let i = allNums.length - 1; i > 0; i--) {
                     seed = (seed * 9301 + 49297) % 233280;
@@ -748,7 +766,6 @@
                             });
                         }
 
-                        // ቢንጎ ማረጋገጥ
                         selectedBoards.forEach(bId => {
                             if(checkBingo(bId, localCalled)) {
                                 clearInterval(globalCallInterval);
@@ -789,6 +806,7 @@
         function resetToLobby() {
             localStorage.removeItem('dila_active_game');
             localStorage.removeItem('dila_shared_timer');
+            localStorage.removeItem('dila_my_boards_' + getDeviceSessionId());
             location.reload();
         }
 
