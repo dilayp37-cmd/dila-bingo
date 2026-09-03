@@ -237,8 +237,8 @@
             color: #2f3640;
         }
         .cartela-cell.marked {
-            background: #2ecc71;
-            color: white;
+            background: #2ecc71 !important;
+            color: white !important;
         }
         .cartela-cell.star {
             background: #2ecc71;
@@ -339,7 +339,7 @@
     <!-- SCREEN 2: ACTIVE GAME -->
     <div id="game-screen" class="game-screen">
         <div class="top-stats">
-            <div class="stat-box"><span>Game ID</span>DIL9</div>
+            <div class="stat-box" id="game-id-box"><span>Game ID</span>DIL9</div>
             <div class="stat-box" id="derash-box"><span>Derash</span>0</div>
             <div class="stat-box" id="players-box"><span>Players</span>1</div>
             <div class="stat-box"><span>Bet</span>10</div>
@@ -618,7 +618,6 @@
                 return;
             }
 
-            // ማስተካከያ፡ ተጫዋቹ ቢያንስ 1 ካርቴላ መምረጥ አለበት ካልመረጠ ቆጣሪው አይጀምርም!
             if (selectedBoards.length === 0) {
                 localStorage.removeItem('dila_shared_timer');
                 countdownTextEl.innerText = `እባክዎ መጫወት ለመጀመር ቢያንስ 1 ካርቴላ ይምረጡ...`;
@@ -646,7 +645,7 @@
 
         function triggerGlobalGameStart() {
             if (selectedBoards.length === 0) {
-                return; // ካርቴላ ከሌለ ጨዋታውን አይጀምርም
+                return;
             }
 
             let totalCost = selectedBoards.length * stakePerBoard;
@@ -661,7 +660,8 @@
 
             let sessionData = {
                 started: true,
-                startTime: Date.now()
+                startTime: Date.now(),
+                gameId: 'DIL' + Math.floor(Math.random() * 900 + 100)
             };
             localStorage.setItem('dila_active_game', JSON.stringify(sessionData));
             startAutomaticGame(sessionData);
@@ -672,6 +672,10 @@
         function startAutomaticGame(session) {
             document.getElementById('selection-screen').style.display = 'none';
             document.getElementById('game-screen').style.display = 'block';
+
+            if (session.gameId) {
+                document.getElementById('game-id-box').innerHTML = `<span>Game ID</span>${session.gameId}`;
+            }
 
             const container = document.getElementById('selectedCartelasContainer');
             container.innerHTML = '';
@@ -698,7 +702,8 @@
                             cellDiv.className += ' star';
                         } else {
                             cellDiv.innerText = val;
-                            cellDiv.id = `cell-${bId}-${val}`;
+                            // የተስተካከለ መለያ (ID) ለቁጥሮች በትክክል እንዲያገኛቸው
+                            cellDiv.id = `cell-${bId}-num-${val}`;
                         }
                         gridEl.appendChild(cellDiv);
                     }
@@ -760,8 +765,10 @@
                             speakNumber(cells[currentNum].letter, currentNum);
 
                             selectedBoards.forEach(bId => {
-                                let cellEl = document.getElementById(`cell-${bId}-${currentNum}`);
-                                if(cellEl) cellEl.classList.add('marked');
+                                let cellEl = document.getElementById(`cell-${bId}-num-${currentNum}`);
+                                if(cellEl) {
+                                    cellEl.classList.add('marked');
+                                }
                             });
                         }
 
